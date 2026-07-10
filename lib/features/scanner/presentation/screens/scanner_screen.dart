@@ -1,8 +1,8 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tato_app/core/constants/tato_constants.dart';
+import 'package:tato_app/core/services/providers.dart';
 import 'package:tato_app/shared/widgets/custom_button.dart';
 import 'package:tato_app/shared/widgets/tato_app_bar.dart';
 
@@ -13,14 +13,14 @@ enum _ScanState { idle, capturing, analyzing, suggested }
 /// Confirmación. No camera plugin or ML Kit inference is wired up yet —
 /// this simulates the timing and result so the flow can be designed and
 /// reviewed before the real on-device model is integrated.
-class ScannerScreen extends StatefulWidget {
+class ScannerScreen extends ConsumerStatefulWidget {
   const ScannerScreen({super.key});
 
   @override
-  State<ScannerScreen> createState() => _ScannerScreenState();
+  ConsumerState<ScannerScreen> createState() => _ScannerScreenState();
 }
 
-class _ScannerScreenState extends State<ScannerScreen> {
+class _ScannerScreenState extends ConsumerState<ScannerScreen> {
   _ScanState _state = _ScanState.idle;
   String? _suggestedCategory;
   int _confidence = 0;
@@ -31,16 +31,13 @@ class _ScannerScreenState extends State<ScannerScreen> {
     await Future.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
     setState(() => _state = _ScanState.analyzing);
-    await Future.delayed(const Duration(milliseconds: 1400));
+
+    final result = await ref.read(classifyProductUseCaseProvider)();
     if (!mounted) return;
 
-    final candidates = TatoCategories.businessTypes
-        .where((c) => c != 'Otro')
-        .toList();
-    final random = Random();
     setState(() {
-      _suggestedCategory = candidates[random.nextInt(candidates.length)];
-      _confidence = 82 + random.nextInt(16); // 82–97%
+      _suggestedCategory = result.category;
+      _confidence = result.confidence;
       _state = _ScanState.suggested;
     });
   }

@@ -6,6 +6,7 @@ import 'package:tato_app/core/constants/tato_constants.dart';
 import 'package:tato_app/core/services/providers.dart';
 import 'package:tato_app/features/inventory/domain/entities/product.dart';
 import 'package:tato_app/shared/widgets/custom_button.dart';
+import 'package:tato_app/shared/widgets/error_state.dart';
 import 'package:tato_app/shared/widgets/product_avatar.dart';
 import 'package:tato_app/shared/widgets/tato_app_bar.dart';
 
@@ -36,6 +37,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   bool _loading = true;
   bool _saving = false;
   String? _error;
+  String? _loadError;
   Product? _existing;
 
   bool get _isEditing => widget.productId != null;
@@ -52,21 +54,29 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       setState(() => _loading = false);
       return;
     }
-    final product =
-        await ref.read(productRepositoryProvider).getProductById(widget.productId!);
-    if (!mounted) return;
-    if (product != null) {
-      _existing = product;
-      _nameController.text = product.name;
-      _skuController.text = product.sku ?? '';
-      _descriptionController.text = product.description ?? '';
-      _priceController.text = product.price.toStringAsFixed(2);
-      _costController.text = product.cost.toStringAsFixed(2);
-      _stockController.text = product.currentStock.toStringAsFixed(0);
-      _minStockController.text = product.minStockAlert.toStringAsFixed(0);
-      _category = product.categoryName;
+    try {
+      final product =
+          await ref.read(productRepositoryProvider).getProductById(widget.productId!);
+      if (!mounted) return;
+      if (product != null) {
+        _existing = product;
+        _nameController.text = product.name;
+        _skuController.text = product.sku ?? '';
+        _descriptionController.text = product.description ?? '';
+        _priceController.text = product.price.toStringAsFixed(2);
+        _costController.text = product.cost.toStringAsFixed(2);
+        _stockController.text = product.currentStock.toStringAsFixed(0);
+        _minStockController.text = product.minStockAlert.toStringAsFixed(0);
+        _category = product.categoryName;
+      }
+      setState(() => _loading = false);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _loadError = 'No se pudo cargar el producto. Intenta de nuevo.';
+      });
     }
-    setState(() => _loading = false);
   }
 
   @override
@@ -159,7 +169,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       appBar: TatoAppBar(title: _isEditing ? 'Editar producto' : 'Nuevo producto'),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
+          : _loadError != null
+              ? ErrorState(message: _loadError!)
+              : SingleChildScrollView(
               padding: const EdgeInsets.all(TatoSpacing.containerPadding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

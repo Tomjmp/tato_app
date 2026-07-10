@@ -33,6 +33,7 @@ class _NewMovementScreenState extends ConsumerState<NewMovementScreen> {
   bool _saving = false;
   bool _loadingProducts = true;
   String? _error;
+  String? _loadError;
   List<Product> _allProducts = [];
 
   static const _exitReasons = ['Venta', 'Merma', 'Devolución', 'Otro'];
@@ -62,16 +63,24 @@ class _NewMovementScreenState extends ConsumerState<NewMovementScreen> {
   }
 
   Future<void> _load() async {
-    final products = await ref.read(productRepositoryProvider).getProducts();
-    if (!mounted) return;
-    setState(() {
-      _allProducts = products;
-      _loadingProducts = false;
-      if (widget.initialProductId != null) {
-        final match = products.where((p) => p.localId == widget.initialProductId).toList();
-        if (match.isNotEmpty) _selectedProduct = match.first;
-      }
-    });
+    try {
+      final products = await ref.read(productRepositoryProvider).getProducts();
+      if (!mounted) return;
+      setState(() {
+        _allProducts = products;
+        _loadingProducts = false;
+        if (widget.initialProductId != null) {
+          final match = products.where((p) => p.localId == widget.initialProductId).toList();
+          if (match.isNotEmpty) _selectedProduct = match.first;
+        }
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _loadingProducts = false;
+        _loadError = 'No se pudo cargar la lista de productos.';
+      });
+    }
   }
 
   @override
@@ -232,6 +241,14 @@ class _NewMovementScreenState extends ConsumerState<NewMovementScreen> {
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: TatoSpacing.md),
                   child: Center(child: CircularProgressIndicator()),
+                )
+              else if (_loadError != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: TatoSpacing.sm),
+                  child: Text(
+                    _loadError!,
+                    style: const TextStyle(color: TatoColors.error, fontSize: 13),
+                  ),
                 )
               else if (_productSearch.isNotEmpty)
                 ..._allProducts

@@ -7,16 +7,40 @@ import 'package:tato_app/features/inventory/domain/entities/product.dart';
 import 'package:tato_app/features/insights/domain/entities/stock_insight.dart';
 import 'package:tato_app/features/movements/domain/entities/inventory_movement.dart';
 import 'package:tato_app/shared/widgets/empty_state.dart';
+import 'package:tato_app/shared/widgets/error_state.dart';
 import 'package:tato_app/shared/widgets/movement_tile.dart';
 
-class HoyScreen extends ConsumerWidget {
+class HoyScreen extends ConsumerStatefulWidget {
   const HoyScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HoyScreen> createState() => _HoyScreenState();
+}
+
+class _HoyScreenState extends ConsumerState<HoyScreen> {
+  late Future<List<Object>> _dataFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Cached once instead of rebuilt inside build() — this screen watches
+    // currentUserProvider, and re-fetching on every rebuild would flash
+    // the whole dashboard back to its loading state unnecessarily.
+    _loadData();
+  }
+
+  void _loadData() {
+    final productRepo = ref.read(productRepositoryProvider);
+    final movementRepo = ref.read(movementRepositoryProvider);
+    _dataFuture = Future.wait([
+      productRepo.getProducts(),
+      movementRepo.getMovements(),
+    ]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
-    final productRepo = ref.watch(productRepositoryProvider);
-    final movementRepo = ref.watch(movementRepositoryProvider);
     final calculateInsights = ref.watch(calculateInsightsUseCaseProvider);
 
     return Scaffold(
@@ -75,16 +99,13 @@ class HoyScreen extends ConsumerWidget {
               ),
               sliver: SliverToBoxAdapter(
                 child: FutureBuilder<List<Object>>(
-                  future: Future.wait([
-                    productRepo.getProducts(),
-                    movementRepo.getMovements(),
-                  ]),
+                  future: _dataFuture,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const _LoadingState();
                     }
                     if (snapshot.hasError) {
-                      return const _ErrorState();
+                      return const ErrorState();
                     }
                     final products =
                         (snapshot.data?[0] as List<Product>?) ?? [];
@@ -374,20 +395,6 @@ class _LoadingState extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.all(TatoSpacing.xxl),
         child: CircularProgressIndicator(),
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(TatoSpacing.xxl),
-        child: Text('Ocurrió un error al cargar el inventario.'),
       ),
     );
   }

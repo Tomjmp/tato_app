@@ -3,9 +3,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tato_app/core/constants/tato_constants.dart';
 import 'package:tato_app/core/services/providers.dart';
 import 'package:tato_app/features/inventory/domain/entities/product.dart';
+import 'package:tato_app/shared/widgets/error_state.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  late Future<List<Product>> _productsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Loaded once instead of inside build() — this screen watches other
+    // providers (e.g. notificationsEnabledProvider) that change on user
+    // interaction, and re-fetching on every rebuild made the stat tiles
+    // flash back to their loading state each time the switch was toggled.
+    _productsFuture = ref.read(productRepositoryProvider).getProducts();
+  }
 
   Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
@@ -31,6 +49,9 @@ class ProfileScreen extends ConsumerWidget {
     );
 
     if (confirmed == true) {
+      await ref.read(logoutUseCaseProvider)();
+      // Business belongs to the session, not to auth itself — cleared
+      // here in presentation, where cross-feature orchestration belongs.
       ref.read(currentBusinessProvider.notifier).state = null;
       ref.read(currentUserProvider.notifier).state = null;
       // GoRouter's redirect sends the user back to /login automatically.
@@ -44,11 +65,10 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final business = ref.watch(currentBusinessProvider);
     final notificationsEnabled = ref.watch(notificationsEnabledProvider);
-    final productRepo = ref.watch(productRepositoryProvider);
 
     return Scaffold(
       backgroundColor: TatoColors.background,
@@ -107,8 +127,13 @@ class ProfileScreen extends ConsumerWidget {
               ),
               const SizedBox(height: TatoSpacing.lg),
               FutureBuilder<List<Product>>(
-                future: productRepo.getProducts(),
+                future: _productsFuture,
                 builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const ErrorState(
+                      message: 'No se pudieron cargar tus estadísticas.',
+                    );
+                  }
                   final products = snapshot.data ?? const <Product>[];
                   final atRisk = products.where((p) => p.needsAttention).length;
                   return Row(

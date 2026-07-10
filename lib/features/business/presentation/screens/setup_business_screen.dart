@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tato_app/core/constants/tato_constants.dart';
+import 'package:tato_app/core/errors/failures.dart';
 import 'package:tato_app/core/services/providers.dart';
-import 'package:tato_app/shared/models/business.dart';
 import 'package:tato_app/shared/widgets/custom_button.dart';
 
 class SetupBusinessScreen extends ConsumerStatefulWidget {
@@ -17,6 +17,7 @@ class _SetupBusinessScreenState extends ConsumerState<SetupBusinessScreen> {
   final _nameController = TextEditingController();
   String? _selectedType;
   String? _error;
+  bool _submitting = false;
 
   @override
   void dispose() {
@@ -24,31 +25,28 @@ class _SetupBusinessScreenState extends ConsumerState<SetupBusinessScreen> {
     super.dispose();
   }
 
-  void _submit() {
-    final name = _nameController.text.trim();
-    if (name.isEmpty) {
-      setState(() => _error = 'Ingresa el nombre de tu negocio.');
-      return;
-    }
-    if (_selectedType == null) {
-      setState(() => _error = 'Selecciona el tipo de negocio.');
-      return;
-    }
+  Future<void> _submit() async {
+    setState(() {
+      _error = null;
+      _submitting = true;
+    });
 
-    final user = ref.read(currentUserProvider);
-    final now = DateTime.now();
-    ref.read(currentBusinessProvider.notifier).state = Business(
-      localId: 'biz-${now.millisecondsSinceEpoch}',
-      cloudId: null,
-      userId: user?.id ?? 'user-local',
-      name: name,
-      category: _selectedType!,
-      currency: 'DOP',
-      createdAt: now,
-      updatedAt: now,
-      synced: false,
-    );
-    if (mounted) context.go('/hoy');
+    try {
+      final userId = ref.read(currentUserProvider)?.id ?? 'user-local';
+      final business = await ref.read(createBusinessUseCaseProvider)(
+        userId: userId,
+        name: _nameController.text,
+        category: _selectedType,
+      );
+      if (!mounted) return;
+      ref.read(currentBusinessProvider.notifier).state = business;
+      context.go('/hoy');
+    } on Failure catch (f) {
+      if (!mounted) return;
+      setState(() => _error = f.message);
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
   }
 
   @override
@@ -136,7 +134,11 @@ class _SetupBusinessScreenState extends ConsumerState<SetupBusinessScreen> {
                 ),
               ],
               const SizedBox(height: TatoSpacing.xxl),
-              CustomButton(label: 'Comenzar', onPressed: _submit),
+              CustomButton(
+                label: 'Comenzar',
+                loading: _submitting,
+                onPressed: _submitting ? null : _submit,
+              ),
             ],
           ),
         ),

@@ -7,29 +7,49 @@ import 'package:tato_app/features/inventory/domain/entities/product.dart';
 import 'package:tato_app/features/insights/domain/entities/stock_insight.dart';
 import 'package:tato_app/features/movements/domain/entities/inventory_movement.dart';
 import 'package:tato_app/shared/widgets/empty_state.dart';
+import 'package:tato_app/shared/widgets/error_state.dart';
 import 'package:tato_app/shared/widgets/insight_card.dart';
 import 'package:tato_app/shared/widgets/product_avatar.dart';
 
-class InsightsScreen extends ConsumerWidget {
+class InsightsScreen extends ConsumerStatefulWidget {
   const InsightsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final productRepo = ref.watch(productRepositoryProvider);
-    final movementRepo = ref.watch(movementRepositoryProvider);
+  ConsumerState<InsightsScreen> createState() => _InsightsScreenState();
+}
+
+class _InsightsScreenState extends ConsumerState<InsightsScreen> {
+  late Future<List<Object>> _dataFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Cached once instead of rebuilt inside build() for the same reason
+    // as Hoy/Perfil: avoids re-fetching (and flashing to loading state)
+    // on every rebuild triggered by unrelated provider changes.
+    final productRepo = ref.read(productRepositoryProvider);
+    final movementRepo = ref.read(movementRepositoryProvider);
+    _dataFuture = Future.wait([
+      productRepo.getProducts(),
+      movementRepo.getMovements(),
+    ]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final calculateInsights = ref.watch(calculateInsightsUseCaseProvider);
 
     return Scaffold(
       backgroundColor: TatoColors.background,
       body: SafeArea(
         child: FutureBuilder<List<Object>>(
-          future: Future.wait([
-            productRepo.getProducts(),
-            movementRepo.getMovements(),
-          ]),
+          future: _dataFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return const ErrorState();
             }
             final products = (snapshot.data?[0] as List<Product>?) ?? [];
             final movements =

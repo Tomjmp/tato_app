@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tato_app/core/constants/tato_constants.dart';
+import 'package:tato_app/core/errors/failures.dart';
 import 'package:tato_app/core/services/providers.dart';
-import 'package:tato_app/shared/models/user.dart';
 import 'package:tato_app/shared/widgets/custom_button.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -33,37 +33,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _submit() async {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
-
-    if (email.isEmpty || password.isEmpty) {
-      setState(() => _error = 'Ingresa tu correo y contraseña para continuar.');
-      return;
-    }
-    if (!email.contains('@')) {
-      setState(() => _error = 'Ingresa un correo electrónico válido.');
-      return;
-    }
-
     setState(() {
       _error = null;
       _submitting = true;
     });
 
-    // Simulated auth latency — no backend yet, this only creates a local
-    // mock session so the rest of the app can be exercised end to end.
-    await Future.delayed(const Duration(milliseconds: 600));
-    if (!mounted) return;
+    try {
+      final user = await ref.read(loginUseCaseProvider)(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+      if (!mounted) return;
+      ref.read(currentUserProvider.notifier).state = user;
 
-    final name = email.split('@').first;
-    ref.read(currentUserProvider.notifier).state = TatoUser(
-      id: 'user-${DateTime.now().millisecondsSinceEpoch}',
-      email: email,
-      name: name.isEmpty ? 'Usuario' : name[0].toUpperCase() + name.substring(1),
-    );
-
-    setState(() => _submitting = false);
-    // GoRouter's redirect takes over from here (→ /setup-business o /hoy).
+      // If this user already has a business (e.g. returning session),
+      // pick it up now instead of sending them through setup again.
+      // The mock repository has no cross-session persistence, so this is
+      // always null today — it's here so the real check needs no rewrite.
+      final business = await ref.read(getBusinessUseCaseProvider)(userId: user.id);
+      if (!mounted) return;
+      if (business != null) {
+        ref.read(currentBusinessProvider.notifier).state = business;
+      }
+      // GoRouter's redirect takes over from here (→ /setup-business o /hoy).
+    } on Failure catch (f) {
+      if (!mounted) return;
+      setState(() => _error = f.message);
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
   }
 
   @override

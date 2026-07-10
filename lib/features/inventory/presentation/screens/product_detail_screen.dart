@@ -7,6 +7,7 @@ import 'package:tato_app/features/inventory/domain/entities/product.dart';
 import 'package:tato_app/features/movements/domain/entities/inventory_movement.dart';
 import 'package:tato_app/shared/widgets/custom_button.dart';
 import 'package:tato_app/shared/widgets/empty_state.dart';
+import 'package:tato_app/shared/widgets/error_state.dart';
 import 'package:tato_app/shared/widgets/movement_tile.dart';
 import 'package:tato_app/shared/widgets/product_avatar.dart';
 import 'package:tato_app/shared/widgets/stock_badge.dart';
@@ -52,6 +53,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Scaffold(
+              appBar: AppBar(backgroundColor: TatoColors.background, elevation: 0),
+              body: const ErrorState(),
+            );
           }
           final product = snapshot.data;
           if (product == null) {
@@ -196,6 +203,11 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                             return const Padding(
                               padding: EdgeInsets.symmetric(vertical: TatoSpacing.lg),
                               child: Center(child: CircularProgressIndicator()),
+                            );
+                          }
+                          if (moveSnapshot.hasError) {
+                            return const ErrorState(
+                              message: 'No se pudo cargar el historial de movimientos.',
                             );
                           }
                           final movements = moveSnapshot.data ?? [];
