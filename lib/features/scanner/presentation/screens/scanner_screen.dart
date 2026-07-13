@@ -25,14 +25,31 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
   String? _suggestedCategory;
   int _confidence = 0;
   bool _editingCategory = false;
+  List<String> _categoryNames = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    final businessId = ref.read(currentBusinessProvider)?.id;
+    if (businessId == null) return;
+    final categories = await ref.read(getCategoriesUseCaseProvider)(businessId);
+    if (mounted) setState(() => _categoryNames = categories.map((c) => c.name).toList());
+  }
 
   Future<void> _capture() async {
+    final businessId = ref.read(currentBusinessProvider)?.id;
+    if (businessId == null) return;
+
     setState(() => _state = _ScanState.capturing);
     await Future.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
     setState(() => _state = _ScanState.analyzing);
 
-    final result = await ref.read(classifyProductUseCaseProvider)();
+    final result = await ref.read(classifyProductUseCaseProvider)(businessId: businessId);
     if (!mounted) return;
 
     setState(() {
@@ -259,7 +276,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
                 Wrap(
                   spacing: TatoSpacing.xs,
                   runSpacing: TatoSpacing.xs,
-                  children: TatoCategories.businessTypes
+                  children: _categoryNames
                       .where((c) => c != 'Otro')
                       .map((c) {
                     final selected = c == _suggestedCategory;

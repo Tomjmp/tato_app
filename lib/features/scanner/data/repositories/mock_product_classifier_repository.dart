@@ -8,5 +8,6 @@ class MockProductClassifierRepository implements ProductClassifierRepository {
   const MockProductClassifierRepository(this.dataSource);
 
   @override
-  Future<ClassificationResult> classify() => dataSource.classify();
+  Future<ClassificationResult> classify({required List<String> candidateCategories}) =>
+      dataSource.classify(candidateCategories: candidateCategories);
 }

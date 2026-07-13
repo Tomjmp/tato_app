@@ -40,6 +40,11 @@ class _SetupBusinessScreenState extends ConsumerState<SetupBusinessScreen> {
       );
       if (!mounted) return;
       ref.read(currentBusinessProvider.notifier).state = business;
+
+      // Seed the default product categories for this business now, so
+      // Stock/ProductForm/Scanner have something real to read from.
+      await ref.read(seedDefaultCategoriesUseCaseProvider)(businessId: business.id);
+      if (!mounted) return;
       context.go('/hoy');
     } on Failure catch (f) {
       if (!mounted) return;

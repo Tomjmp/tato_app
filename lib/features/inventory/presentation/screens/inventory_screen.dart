@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tato_app/core/constants/tato_constants.dart';
 import 'package:tato_app/core/services/providers.dart';
+import 'package:tato_app/features/category/domain/entities/category.dart';
 import 'package:tato_app/features/inventory/domain/entities/product.dart';
 import 'package:tato_app/shared/widgets/empty_state.dart';
 import 'package:tato_app/shared/widgets/product_card.dart';
@@ -19,11 +20,13 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   String? _selectedCategory; // null = Todos
   Set<ProductStatus> _statusFilter = {}; // empty = no status filter
   late Future<List<Product>> _productsFuture;
+  List<Category> _categories = [];
 
   @override
   void initState() {
     super.initState();
     _loadProducts();
+    _loadCategories();
   }
 
   // Loaded once and refreshed explicitly (pull-to-refresh, or after
@@ -31,6 +34,13 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   // search field must not re-trigger the mock network delay.
   void _loadProducts() {
     _productsFuture = ref.read(productRepositoryProvider).getProducts();
+  }
+
+  Future<void> _loadCategories() async {
+    final businessId = ref.read(currentBusinessProvider)?.id;
+    if (businessId == null) return;
+    final categories = await ref.read(getCategoriesUseCaseProvider)(businessId);
+    if (mounted) setState(() => _categories = categories);
   }
 
   Future<void> _refresh() async {
@@ -70,7 +80,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       ),
     );
     if (confirmed == true) {
-      await ref.read(productRepositoryProvider).deleteProduct(product.localId);
+      await ref.read(productRepositoryProvider).deleteProduct(product.id);
       if (mounted) _refresh();
     }
   }
@@ -168,7 +178,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 padding: const EdgeInsets.symmetric(
                   horizontal: TatoSpacing.containerPadding,
                 ),
-                itemCount: TatoCategories.businessTypes.length + 1,
+                itemCount: _categories.length + 1,
                 separatorBuilder: (_, __) => const SizedBox(width: 8),
                 itemBuilder: (context, i) {
                   if (i == 0) {
@@ -178,7 +188,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       onTap: () => setState(() => _selectedCategory = null),
                     );
                   }
-                  final category = TatoCategories.businessTypes[i - 1];
+                  final category = _categories[i - 1].name;
                   return _FilterChip(
                     label: category,
                     selected: _selectedCategory == category,
@@ -274,11 +284,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                     return ProductCard(
                                       product: product,
                                       onTap: () async {
-                                        await context.push('/inventory/${product.localId}');
+                                        await context.push('/inventory/${product.id}');
                                         if (mounted) _refresh();
                                       },
                                       onEdit: () async {
-                                        await context.push('/inventory/${product.localId}/edit');
+                                        await context.push('/inventory/${product.id}/edit');
                                         if (mounted) _refresh();
                                       },
                                       onDelete: () => _deleteProduct(product),

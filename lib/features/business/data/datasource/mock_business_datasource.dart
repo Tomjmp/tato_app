@@ -8,6 +8,7 @@ class MockBusinessDataSource {
   final Map<String, Business> _businessesByUser = {};
 
   Future<Business> createBusiness({
+    required String id,
     required String userId,
     required String name,
     required String category,
@@ -16,7 +17,7 @@ class MockBusinessDataSource {
 
     final now = DateTime.now();
     final business = Business(
-      localId: 'biz-${now.millisecondsSinceEpoch}',
+      id: id,
       userId: userId,
       name: name,
       category: category,

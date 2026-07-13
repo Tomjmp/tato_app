@@ -3,10 +3,27 @@ import 'package:flutter/material.dart';
 class TatoCategories {
   TatoCategories._();
 
+  /// Tipo de negocio, elegido una vez en el onboarding (`Business.category`).
+  /// Concepto distinto de las categorías de producto — no se toca aquí.
   static const List<String> businessTypes = [
     'Belleza',
     'Alimentos',
     'Bebidas',
+    'Ropa',
+    'Accesorios',
+    'Colmado',
+    'Otro',
+  ];
+
+  /// Categorías de producto sembradas por defecto en cada negocio nuevo
+  /// (ver `SeedDefaultCategoriesUseCase`). El negocio puede editarlas o
+  /// agregar las suyas — esta lista es solo el punto de partida.
+  static const List<String> defaultProductCategories = [
+    'Belleza',
+    'Alimentos',
+    'Bebidas',
+    'Cuidado personal',
+    'Limpieza',
     'Ropa',
     'Accesorios',
     'Colmado',
@@ -21,6 +38,10 @@ class TatoCategories {
         return Icons.restaurant_outlined;
       case 'Bebidas':
         return Icons.local_cafe_outlined;
+      case 'Cuidado personal':
+        return Icons.spa_outlined;
+      case 'Limpieza':
+        return Icons.cleaning_services_outlined;
       case 'Ropa':
         return Icons.checkroom_outlined;
       case 'Accesorios':
@@ -40,6 +61,10 @@ class TatoCategories {
         return const Color(0xFFF59E0B);
       case 'Bebidas':
         return const Color(0xFF3B82F6);
+      case 'Cuidado personal':
+        return const Color(0xFFF472B6);
+      case 'Limpieza':
+        return const Color(0xFF0EA5E9);
       case 'Ropa':
         return const Color(0xFF8B5CF6);
       case 'Accesorios':

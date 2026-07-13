@@ -70,7 +70,7 @@ class _NewMovementScreenState extends ConsumerState<NewMovementScreen> {
         _allProducts = products;
         _loadingProducts = false;
         if (widget.initialProductId != null) {
-          final match = products.where((p) => p.localId == widget.initialProductId).toList();
+          final match = products.where((p) => p.id == widget.initialProductId).toList();
           if (match.isNotEmpty) _selectedProduct = match.first;
         }
       });
@@ -120,8 +120,8 @@ class _NewMovementScreenState extends ConsumerState<NewMovementScreen> {
 
     final now = DateTime.now();
     final movement = InventoryMovement(
-      localId: const Uuid().v4(),
-      productId: _selectedProduct!.localId,
+      id: const Uuid().v4(),
+      productId: _selectedProduct!.id,
       productName: _selectedProduct!.name,
       type: _type,
       quantity: _quantity.toDouble(),

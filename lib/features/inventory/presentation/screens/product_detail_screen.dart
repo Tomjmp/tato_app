@@ -88,7 +88,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     IconButton(
                       icon: const Icon(Icons.edit_outlined),
                       onPressed: () async {
-                        await context.push('/inventory/${product.localId}/edit');
+                        await context.push('/inventory/${product.id}/edit');
                         if (mounted) _refresh();
                       },
                     ),
@@ -171,7 +171,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               variant: CustomButtonVariant.danger,
                               onPressed: () async {
                                 await context.push(
-                                    '/new-movement?productId=${product.localId}');
+                                    '/new-movement?productId=${product.id}');
                                 if (mounted) _refresh();
                               },
                             ),
@@ -184,7 +184,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               variant: CustomButtonVariant.secondary,
                               onPressed: () async {
                                 await context.push(
-                                    '/new-movement?productId=${product.localId}');
+                                    '/new-movement?productId=${product.id}');
                                 if (mounted) _refresh();
                               },
                             ),

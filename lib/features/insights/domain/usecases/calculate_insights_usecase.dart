@@ -30,7 +30,7 @@ class CalculateInsightsUseCase {
     for (final product in products) {
       final unitsSold = movements
           .where((m) =>
-              m.productId == product.localId &&
+              m.productId == product.id &&
               m.isExit &&
               m.date.isAfter(windowStart))
           .fold<double>(0, (sum, m) => sum + m.quantity);

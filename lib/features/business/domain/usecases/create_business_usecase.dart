@@ -1,3 +1,4 @@
+import 'package:uuid/uuid.dart';
 import 'package:tato_app/core/errors/failures.dart';
 import 'package:tato_app/shared/models/business.dart';
 import '../repositories/business_repository.dart';
@@ -22,6 +23,7 @@ class CreateBusinessUseCase {
     }
 
     return repository.createBusiness(
+      id: const Uuid().v4(),
       userId: userId,
       name: trimmedName,
       category: category,

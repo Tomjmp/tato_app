@@ -162,7 +162,7 @@ class _HoyScreenState extends ConsumerState<HoyScreen> {
                           _FeaturedInsightCard(
                             velocity: insight.mostUrgentDepletion!,
                             onViewDetail: () => context
-                                .push('/inventory/${insight.mostUrgentDepletion!.product.localId}'),
+                                .push('/inventory/${insight.mostUrgentDepletion!.product.id}'),
                           ),
                         ],
                         const SizedBox(height: TatoSpacing.xl),

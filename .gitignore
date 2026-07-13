@@ -43,3 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Supabase credentials for --dart-define-from-file — copy from
+# dart_define.example.json and fill in your own project's values.
+dart_define.json

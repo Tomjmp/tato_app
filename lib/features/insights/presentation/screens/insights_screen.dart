@@ -108,7 +108,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                               icon: Icons.bolt_outlined,
                               velocity: v,
                               metric: '${v.unitsPerDay.toStringAsFixed(1)} uds./día',
-                              onTap: () => context.push('/inventory/${v.product.localId}'),
+                              onTap: () => context.push('/inventory/${v.product.id}'),
                             ),
                           ),
                         for (final v in insight.slowMovingProducts)
@@ -120,7 +120,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                               icon: Icons.hourglass_disabled_outlined,
                               velocity: v,
                               metric: 'Sin ventas en 14 días',
-                              onTap: () => context.push('/inventory/${v.product.localId}'),
+                              onTap: () => context.push('/inventory/${v.product.id}'),
                             ),
                           ),
                         if (insight.fastMovingProducts.isEmpty && insight.slowMovingProducts.isEmpty)
@@ -174,7 +174,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                                     subtitle: v.depletionMessage,
                                     color: TatoColors.warning,
                                     onTap: () => context
-                                        .push('/inventory/${v.product.localId}'),
+                                        .push('/inventory/${v.product.id}'),
                                   ))
                               .toList(),
                         ),

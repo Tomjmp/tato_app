@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import 'package:tato_app/core/constants/tato_constants.dart';
 import 'package:tato_app/core/services/providers.dart';
+import 'package:tato_app/features/category/domain/entities/category.dart';
 import 'package:tato_app/features/inventory/domain/entities/product.dart';
 import 'package:tato_app/shared/widgets/custom_button.dart';
 import 'package:tato_app/shared/widgets/error_state.dart';
@@ -33,7 +34,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   final _stockController = TextEditingController(text: '0');
   final _minStockController = TextEditingController(text: '5');
 
-  String? _category;
+  Category? _selectedCategory;
+  List<Category> _categories = [];
   bool _loading = true;
   bool _saving = false;
   String? _error;
@@ -45,31 +47,48 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   @override
   void initState() {
     super.initState();
-    _category = widget.initialCategory;
     _load();
   }
 
-  Future<void> _load() async {
-    if (widget.productId == null) {
-      setState(() => _loading = false);
-      return;
+  Category? _findCategoryByName(String? name) {
+    if (name == null) return null;
+    for (final c in _categories) {
+      if (c.name == name) return c;
     }
+    return null;
+  }
+
+  Future<void> _load() async {
     try {
-      final product =
-          await ref.read(productRepositoryProvider).getProductById(widget.productId!);
+      final businessId = ref.read(currentBusinessProvider)?.id;
+      final categories = businessId != null
+          ? await ref.read(getCategoriesUseCaseProvider)(businessId)
+          : <Category>[];
       if (!mounted) return;
-      if (product != null) {
-        _existing = product;
-        _nameController.text = product.name;
-        _skuController.text = product.sku ?? '';
-        _descriptionController.text = product.description ?? '';
-        _priceController.text = product.price.toStringAsFixed(2);
-        _costController.text = product.cost.toStringAsFixed(2);
-        _stockController.text = product.currentStock.toStringAsFixed(0);
-        _minStockController.text = product.minStockAlert.toStringAsFixed(0);
-        _category = product.categoryName;
+
+      Product? product;
+      if (widget.productId != null) {
+        product = await ref.read(productRepositoryProvider).getProductById(widget.productId!);
+        if (!mounted) return;
       }
-      setState(() => _loading = false);
+
+      setState(() {
+        _categories = categories;
+        if (product != null) {
+          _existing = product;
+          _nameController.text = product.name;
+          _skuController.text = product.sku ?? '';
+          _descriptionController.text = product.description ?? '';
+          _priceController.text = product.price.toStringAsFixed(2);
+          _costController.text = product.cost.toStringAsFixed(2);
+          _stockController.text = product.currentStock.toStringAsFixed(0);
+          _minStockController.text = product.minStockAlert.toStringAsFixed(0);
+          _selectedCategory = _findCategoryByName(product.categoryName);
+        } else {
+          _selectedCategory = _findCategoryByName(widget.initialCategory);
+        }
+        _loading = false;
+      });
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -94,7 +113,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   Future<void> _openScanner() async {
     final suggested = await context.push<String>('/scanner');
     if (suggested != null && mounted) {
-      setState(() => _category = suggested);
+      setState(() => _selectedCategory = _findCategoryByName(suggested));
     }
   }
 
@@ -109,7 +128,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       setState(() => _error = 'Ingresa el nombre del producto.');
       return;
     }
-    if (_category == null) {
+    if (_selectedCategory == null) {
       setState(() => _error = 'Selecciona una categoría.');
       return;
     }
@@ -138,15 +157,14 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     final now = DateTime.now();
     final business = ref.read(currentBusinessProvider);
     final product = Product(
-      localId: _existing?.localId ?? const Uuid().v4(),
-      cloudId: _existing?.cloudId,
-      businessId: _existing?.businessId ?? business?.localId ?? 'biz-local',
+      id: _existing?.id ?? const Uuid().v4(),
+      businessId: _existing?.businessId ?? business?.id ?? 'biz-local',
       name: name,
       description:
           _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
       sku: _skuController.text.trim().isEmpty ? null : _skuController.text.trim(),
-      categoryId: _category,
-      categoryName: _category,
+      categoryId: _selectedCategory!.id,
+      categoryName: _selectedCategory!.name,
       imageUrl: _existing?.imageUrl,
       price: price,
       cost: cost,
@@ -181,7 +199,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       children: [
                         ProductAvatar(
                           imageUrl: _existing?.imageUrl,
-                          categoryName: _category,
+                          categoryName: _selectedCategory?.name,
                           size: 84,
                           radius: TatoSizes.radiusXl,
                         ),
@@ -214,14 +232,22 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                   const SizedBox(height: TatoSpacing.md),
                   Text('Categoría', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: TatoSpacing.sm),
+                  if (_categories.isEmpty)
+                    Text(
+                      'Este negocio todavía no tiene categorías.',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: TatoColors.onSurfaceVariant),
+                    ),
                   Wrap(
                     spacing: TatoSpacing.xs,
                     runSpacing: TatoSpacing.xs,
-                    children: TatoCategories.businessTypes.map((type) {
-                      final selected = _category == type;
-                      final color = TatoCategories.colorFor(type);
+                    children: _categories.map((cat) {
+                      final selected = _selectedCategory?.id == cat.id;
+                      final color = TatoCategories.colorFor(cat.name);
                       return GestureDetector(
-                        onTap: () => setState(() => _category = type),
+                        onTap: () => setState(() => _selectedCategory = cat),
                         child: Container(
                           padding:
                               const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -236,11 +262,11 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(TatoCategories.iconFor(type),
+                              Icon(TatoCategories.iconFor(cat.name),
                                   size: 15, color: selected ? color : TatoColors.onSurfaceVariant),
                               const SizedBox(width: 5),
                               Text(
-                                type,
+                                cat.name,
                                 style: TextStyle(
                                   color: selected ? color : TatoColors.onSurfaceVariant,
                                   fontSize: 12,

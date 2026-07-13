@@ -17,8 +17,7 @@ extension MovementTypeLabel on MovementType {
 
 @immutable
 class InventoryMovement {
-  final String localId;
-  final String? cloudId;
+  final String id;
   final String productId;
   final String productName;
   final MovementType type;
@@ -35,8 +34,7 @@ class InventoryMovement {
   final bool synced;
 
   const InventoryMovement({
-    required this.localId,
-    this.cloudId,
+    required this.id,
     required this.productId,
     required this.productName,
     required this.type,
@@ -67,8 +65,7 @@ class InventoryMovement {
   }
 
   InventoryMovement copyWith({
-    String? localId,
-    String? cloudId,
+    String? id,
     String? productId,
     String? productName,
     MovementType? type,
@@ -82,8 +79,7 @@ class InventoryMovement {
     bool? synced,
   }) {
     return InventoryMovement(
-      localId: localId ?? this.localId,
-      cloudId: cloudId ?? this.cloudId,
+      id: id ?? this.id,
       productId: productId ?? this.productId,
       productName: productName ?? this.productName,
       type: type ?? this.type,
@@ -99,8 +95,7 @@ class InventoryMovement {
   }
 
   Map<String, dynamic> toJson() => {
-        'localId': localId,
-        'cloudId': cloudId,
+        'id': id,
         'productId': productId,
         'productName': productName,
         'type': type.name,
@@ -116,8 +111,7 @@ class InventoryMovement {
 
   factory InventoryMovement.fromJson(Map<String, dynamic> json) {
     return InventoryMovement(
-      localId: json['localId'] as String,
-      cloudId: json['cloudId'] as String?,
+      id: json['id'] as String,
       productId: json['productId'] as String,
       productName: json['productName'] as String,
       type: MovementType.values.byName(json['type'] as String),
