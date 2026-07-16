@@ -1,11 +1,11 @@
 {
-    "name": "tato_app",
-    "short_name": "tato_app",
+    "name": "TÁTO",
+    "short_name": "TÁTO",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#1D4ED8",
+    "theme_color": "#1D4ED8",
+    "description": "Inteligencia de inventario para pequeños negocios. Tu inventario, sin complicarte.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
