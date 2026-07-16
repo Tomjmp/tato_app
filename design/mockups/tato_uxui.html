@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TÁTO · Sistema de diseño y pantallas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0}
+body{font-family:'Inter',system-ui,sans-serif;background:#f1f5f9;color:#0f172a;padding:40px 20px 80px}
+.wrap{max-width:1060px;margin:0 auto}
+header{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:8px}
+.wordmark{font-family:'Space Grotesk',sans-serif;font-size:46px;font-weight:700;letter-spacing:-1.5px;line-height:1.05}
+.tag{font-size:14px;color:#475569}
+.meta{margin-left:auto;font-size:12px;color:#64748b;font-weight:500}
+h2{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;margin:44px 0 14px}
+.bcard{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:20px}
+.g{font-family:'Space Grotesk','Inter',sans-serif}
+.grid{display:grid;gap:12px}
+.phones{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:34px 22px;justify-items:center}
+.ph{width:100%;max-width:312px}
+.bezel{background:#0f172a;border-radius:40px;padding:9px}
+.scr{background:#f8fafc;border-radius:32px;min-height:640px;display:flex;flex-direction:column;overflow:hidden;color:#0f172a;font-size:14px;line-height:1.45}
+.cap{font-size:13px;color:#475569;text-align:center;margin-top:10px}
+.cap b{font-weight:600;color:#0f172a}
+.stat{display:flex;justify-content:space-between;align-items:center;padding:12px 20px 4px;font-size:12px;font-weight:600}
+.stat i{font-size:13px}
+.pad{padding:0 18px}
+.inp{display:flex;align-items:center;gap:8px;background:#eef2f7;border-radius:14px;padding:13px 14px;color:#94a3b8;font-size:13px;font-weight:500}
+.inp i{font-size:17px}
+.lab{font-size:12px;font-weight:600;margin:14px 0 6px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;background:#1d4ed8;color:#fff;border-radius:16px;padding:14px;font-size:14px;font-weight:600}
+.btn.o{background:#fff;color:#0f172a;border:1.5px solid #e2e8f0}
+.chip{display:inline-flex;align-items:center;gap:5px;border:1.5px solid #e2e8f0;background:#fff;color:#334155;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:600;white-space:nowrap}
+.chip i{font-size:14px}
+.chip.on{background:#0f172a;border-color:#0f172a;color:#fff}
+.chip.bl{background:#1d4ed8;border-color:#1d4ed8;color:#fff}
+.bdg{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700;white-space:nowrap}
+.bdg i{font-size:12px}
+.ok{background:#ccfbf1;color:#0f5c4e}.am{background:#fef3c7;color:#92400e}.bad{background:#fee2e2;color:#991b1b}.lil{background:#ede9fe;color:#5b21b6}.blu{background:#dbeafe;color:#1e3a8a}.pk{background:#fce7f3;color:#9d174d}.gy{background:#f1f5f9;color:#475569}
+.tile{display:flex;align-items:center;justify-content:center;border-radius:14px;font-weight:700;flex:none}
+.row{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #eef2f7;border-radius:16px;padding:10px 12px;margin-bottom:8px}
+.n{font-size:13px;font-weight:600}.s{font-size:11.5px;color:#64748b}
+.grow{flex:1;min-width:0}
+.bn{margin-top:auto;display:flex;justify-content:space-around;align-items:center;background:#fff;border-top:1px solid #eef2f7;padding:8px 6px 14px}
+.bni{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:600;color:#94a3b8}
+.bni.on{color:#1d4ed8}
+.bni i{font-size:20px}
+.scan{width:46px;height:46px;border-radius:16px;background:#1d4ed8;color:#fff;display:flex;align-items:center;justify-content:center;margin-top:-26px;border:4px solid #f8fafc}
+.scan i{font-size:22px}
+.shead{display:flex;align-items:baseline;justify-content:space-between;margin:14px 0 8px}
+.lnk{color:#1d4ed8;font-size:12px;font-weight:600}
+.mrow{display:flex;gap:8px}
+.mtile{flex:1;border-radius:16px;padding:10px}
+.mnum{font-size:20px;font-weight:700}
+.mlab{font-size:11px;font-weight:600}
+.sw{border-radius:14px;height:52px;margin-bottom:8px}
+.swl{font-size:13px;font-weight:600}
+.swh{font-size:12px;color:#64748b;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.swu{font-size:11.5px;color:#475569}
+.seg{display:flex;background:#eef2f7;border-radius:16px;padding:4px;margin-top:12px}
+.seg div{flex:1;text-align:center;padding:9px 0;font-size:13px;font-weight:600;color:#64748b;border-radius:12px}
+.seg .on{background:#0f172a;color:#fff}
+.vcap{font-size:12px;color:#64748b;text-align:center;margin-top:8px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="mark" viewBox="0 0 120 120">
+    <path d="M42 32 V72 Q42 91 60 91" stroke="#0F172A" stroke-width="14" stroke-linecap="round" fill="none"/>
+    <path d="M80 20 V72 Q80 91 98 91" stroke="#0F172A" stroke-width="14" stroke-linecap="round" fill="none"/>
+    <path d="M24 50 H100" stroke="#0F172A" stroke-width="14" stroke-linecap="round" fill="none"/>
+    <circle cx="102" cy="24" r="8" fill="#14B8A6"/>
+  </symbol>
+  <symbol id="markb" viewBox="0 0 120 120">
+    <path d="M42 32 V72 Q42 91 60 91" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" fill="none"/>
+    <path d="M80 20 V72 Q80 91 98 91" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" fill="none"/>
+    <path d="M24 50 H100" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" fill="none"/>
+    <circle cx="102" cy="24" r="8" fill="#2DD4BF"/>
+  </symbol>
+</svg>
+<div class="wrap">
+
+<header>
+  <svg width="76" height="76" viewBox="0 0 120 120"><use href="#mark"/></svg>
+  <div>
+    <div class="wordmark">TÁTO</div>
+    <div class="tag">Tu inventario, sin complicarte.</div>
+  </div>
+  <div class="meta">Sistema de diseño y pantallas · v1.0 · TI3-701</div>
+</header>
+
+<h2>Logo</h2>
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+  <div class="bcard" style="text-align:center">
+    <svg width="88" height="88" viewBox="0 0 120 120"><use href="#mark"/></svg>
+    <div class="vcap">Símbolo · fondos claros</div>
+  </div>
+  <div class="bcard" style="text-align:center;background:#0f172a;border-color:#0f172a">
+    <svg width="88" height="88" viewBox="0 0 120 120"><use href="#markb"/></svg>
+    <div class="vcap" style="color:#94a3b8">Símbolo · fondos oscuros</div>
+  </div>
+  <div class="bcard" style="text-align:center">
+    <svg width="88" height="88" viewBox="0 0 120 120"><rect width="120" height="120" rx="27" fill="#1D4ED8"/><g transform="translate(12 12) scale(0.8)"><path d="M42 32 V72 Q42 91 60 91" stroke="#fff" stroke-width="14" stroke-linecap="round" fill="none"/><path d="M80 20 V72 Q80 91 98 91" stroke="#fff" stroke-width="14" stroke-linecap="round" fill="none"/><path d="M24 50 H100" stroke="#fff" stroke-width="14" stroke-linecap="round" fill="none"/><circle cx="102" cy="24" r="8" fill="#2DD4BF"/></g></svg>
+    <div class="vcap">Ícono de app</div>
+  </div>
+  <div class="bcard" style="text-align:center">
+    <svg width="88" height="88" viewBox="0 0 120 120" style="opacity:.45"><use href="#mark"/></svg>
+    <div class="vcap">Uso monocromático</div>
+  </div>
+</div>
+
+<h2>Paleta de color</h2>
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+  <div><div class="sw" style="background:#1d4ed8"></div><div class="swl">Azul eléctrico</div><div class="swh">#1D4ED8</div><div class="swu">Marca, botones, acción</div></div>
+  <div><div class="sw" style="background:#0f172a"></div><div class="swl">Tinta</div><div class="swh">#0F172A</div><div class="swu">Texto, logo, filtros activos</div></div>
+  <div><div class="sw" style="background:#14b8a6"></div><div class="swl">Menta</div><div class="swh">#14B8A6</div><div class="swu">Éxito, sync, en stock</div></div>
+  <div><div class="sw" style="background:#8b5cf6"></div><div class="swl">Lila</div><div class="swh">#8B5CF6</div><div class="swu">Insights, plan Pro</div></div>
+  <div><div class="sw" style="background:#f59e0b"></div><div class="swl">Ámbar</div><div class="swh">#F59E0B</div><div class="swu">Bajo stock, atención</div></div>
+  <div><div class="sw" style="background:#ef4444"></div><div class="swl">Coral</div><div class="swh">#EF4444</div><div class="swu">Agotado, riesgo, salidas</div></div>
+  <div><div class="sw" style="background:#f8fafc;border:1px solid #e2e8f0"></div><div class="swl">Niebla</div><div class="swh">#F8FAFC</div><div class="swu">Fondo de pantallas</div></div>
+</div>
+
+<h2>Tipografía</h2>
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
+  <div class="bcard">
+    <div style="font-size:12px;color:#64748b;margin-bottom:8px">Space Grotesk · titulares y números</div>
+    <div class="g" style="font-size:25px;font-weight:700;line-height:1.25">Tu inventario, sin complicarte.</div>
+    <div style="font-size:12px;color:#475569;margin-top:10px">Display 28/700 · Título 22/700 · Métrica 20/700</div>
+  </div>
+  <div class="bcard">
+    <div style="font-size:12px;color:#64748b;margin-bottom:8px">Inter · interfaz y cuerpo</div>
+    <div style="font-size:15px;line-height:1.6">Registra entradas y salidas, escanea con la cámara y decide en segundos.</div>
+    <div style="font-size:12px;color:#475569;margin-top:10px">Cuerpo 15/400 · Etiqueta 12/600 · Botón 14/600 · mínimo 11</div>
+  </div>
+</div>
+
+<h2>Componentes base</h2>
+<div class="bcard" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+  <span class="btn" style="padding:12px 20px"><i class="ti ti-plus" aria-hidden="true"></i>Registrar movimiento</span>
+  <span class="btn o" style="padding:12px 20px">Cancelar</span>
+  <span class="chip on">Todos</span>
+  <span class="chip"><i class="ti ti-sparkles" aria-hidden="true"></i>Belleza</span>
+  <span class="bdg ok">En stock</span>
+  <span class="bdg am">Bajo stock</span>
+  <span class="bdg bad">Agotado</span>
+  <span class="bdg lil">Pro</span>
+  <span class="inp" style="width:210px"><i class="ti ti-search" aria-hidden="true"></i>Buscar producto…</span>
+  <span style="display:inline-flex;align-items:center;gap:14px">
+    <span class="tile" style="width:40px;height:40px;border-radius:50%;background:#fff;border:1.5px solid #e2e8f0;color:#0f172a;font-size:18px">−</span>
+    <span class="g" style="font-size:26px;font-weight:700">2</span>
+    <span class="tile" style="width:40px;height:40px;border-radius:50%;background:#1d4ed8;color:#fff;font-size:18px">+</span>
+  </span>
+</div>
+
+<h2>Las 10 pantallas</h2>
+<div class="phones">
+
+<div class="ph"><div class="bezel"><div class="scr" style="background:#1d4ed8;color:#fff">
+  <div class="stat"><span>9:41</span><span style="display:flex;gap:5px"><i class="ti ti-antenna-bars-5" aria-hidden="true"></i><i class="ti ti-wifi" aria-hidden="true"></i><i class="ti ti-battery-3" aria-hidden="true"></i></span></div>
+  <div class="pad" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+    <svg width="100" height="100" viewBox="0 0 120 120" style="margin-bottom:14px"><use href="#markb"/></svg>
+    <div class="g" style="font-size:42px;font-weight:700;letter-spacing:-1px">TÁTO</div>
+    <div style="font-size:14px;color:rgba(255,255,255,.78);margin-top:4px">Tu inventario, sin complicarte.</div>
+    <div style="display:flex;gap:6px;margin-top:20px;flex-wrap:wrap;justify-content:center">
+      <span class="bdg" style="background:rgba(255,255,255,.14);color:#fff"><i class="ti ti-wifi-off" aria-hidden="true"></i>Offline</span>
+      <span class="bdg" style="background:rgba(255,255,255,.14);color:#fff"><i class="ti ti-sparkles" aria-hidden="true"></i>IA on-device</span>
+      <span class="bdg" style="background:rgba(255,255,255,.14);color:#fff"><i class="ti ti-bell" aria-hidden="true"></i>Alertas</span>
+    </div>
+  </div>
+  <div class="pad" style="padding-bottom:24px">
+    <div style="display:flex;gap:5px;justify-content:center;margin-bottom:14px">
+      <span style="width:18px;height:6px;border-radius:99px;background:#fff"></span>
+      <span style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4)"></span>
+      <span style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4)"></span>
+    </div>
+    <div class="btn" style="background:#fff;color:#1d4ed8">Empezar</div>
+  </div>
+</div></div><div class="cap"><b>01 · Splash y onboarding</b><br>La marca y su promesa en una línea</div></div>
+
+<div class="ph"><div class="bezel"><div class="scr">
+  <div class="stat"><span>9:41</span><span style="display:flex;gap:5px"><i class="ti ti-antenna-bars-5" aria-hidden="true"></i><i class="ti ti-wifi" aria-hidden="true"></i><i class="ti ti-battery-3" aria-hidden="true"></i></span></div>
+  <div class="pad" style="display:flex;flex-direction:column;flex:1">
+    <svg width="52" height="52" viewBox="0 0 120 120" style="margin:14px 0 16px"><use href="#mark"/></svg>
+    <div class="g" style="font-size:26px;font-weight:700">Hola de nuevo</div>
+    <div class="s" style="font-size:13px;margin-top:2px">Entra para ver cómo va tu negocio.</div>
+    <div class="lab">Correo</div>
+    <div class="inp"><i class="ti ti-mail" aria-hidden="true"></i>karla@negocio.do</div>
+    <div class="lab">Contraseña</div>
+    <div class="inp"><i class="ti ti-lock" aria-hidden="true"></i>••••••••<i class="ti ti-eye" style="margin-left:auto" aria-hidden="true"></i></div>
+    <div style="text-align:right;margin-top:8px"><span class="lnk">¿Olvidaste tu contraseña?</span></div>
+    <div class="btn" style="margin-top:18px">Iniciar sesión</div>
+    <div style="display:flex;align-items:center;gap:10px;margin:14px 0;color:#94a3b8;font-size:12px">
+      <span style="flex:1;height:1px;background:#e2e8f0"></span>o<span style="flex:1;height:1px;background:#e2e8f0"></span>
+    </div>
+    <div class="btn o">Crear cuenta gratis</div>
+    <div style="margin-top:auto;padding:18px 0;text-align:center">
+      <span class="bdg ok"><i class="ti ti-wifi-off" aria-hidden="true"></i>Funciona sin internet</span>
+    </div>
+  </div>
+</div></div><div class="cap"><b>02 · Login y registro</b><br>Dos campos, cero fricción</div></div>
+
+<div class="ph"><div class="bezel"><div class="scr">
+  <div class="stat"><span>9:41</span><span style="display:flex;gap:5px"><i class="ti ti-antenna-bars-5" aria-hidden="true"></i><i class="ti ti-wifi" aria-hidden="true"></i><i class="ti ti-battery-3" aria-hidden="true"></i></span></div>
+  <div class="pad" style="display:flex;flex-direction:column;flex:1">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0 8px">
+      <i class="ti ti-arrow-left" style="font-size:20px" aria-hidden="true"></i>
+      <span class="s" style="font-weight:600">Paso 2 de 2</span>
+    </div>
+    <div style="height:5px;border-radius:99px;background:#e2e8f0"><div style="width:100%;height:5px;border-radius:99px;background:#1d4ed8"></div></div>
+    <div class="g" style="font-size:24px;font-weight:700;margin-top:16px">Crea tu negocio</div>
+    <div class="s" style="font-size:13px;margin-top:2px">Así TÁTO personaliza tus categorías y alertas.</div>
+    <div class="lab">Nombre del negocio</div>
+    <div class="inp" style="color:#0f172a"><i class="ti ti-building-store" style="color:#64748b" aria-hidden="true"></i>Glow Skincare RD</div>
+    <div class="lab">Tipo de negocio</div>
+    <div style="display:flex;flex-wrap:wrap;gap:7px">
+      <span class="chip bl"><i class="ti ti-sparkles" aria-hidden="true"></i>Belleza</span>
+      <span class="chip"><i class="ti ti-tools-kitchen-2" aria-hidden="true"></i>Alimentos</span>
+      <span class="chip"><i class="ti ti-cup" aria-hidden="true"></i>Bebidas</span>
+      <span class="chip"><i class="ti ti-hanger" aria-hidden="true"></i>Ropa</span>
+      <span class="chip"><i class="ti ti-diamond" aria-hidden="true"></i>Accesorios</span>
+      <span class="chip"><i class="ti ti-building-store" aria-hidden="true"></i>Colmado</span>
+      <span class="chip"><i class="ti ti-dots" aria-hidden="true"></i>Otro</span>
+    </div>
+    <div class="lab">Moneda</div>
+    <div class="inp" style="background:#fff;border:1.5px solid #e2e8f0;color:#0f172a">DOP · Peso dominicano<i class="ti ti-chevron-down" style="margin-left:auto;color:#94a3b8" aria-hidden="true"></i></div>
+    <div style="margin-top:auto;padding-bottom:20px">
+      <div class="btn">Crear mi negocio</div>
+      <div class="s" style="text-align:center;margin-top:10px">Podrás editarlo cuando quieras.</div>
+    </div>
+  </div>
+</div></div><div class="cap"><b>03 · Crear negocio</b><br>Chips visuales en vez de dropdowns</div></div>
+
+<div class="ph"><div class="bezel"><div class="scr">
+  <div class="stat"><span>9:41</span><span style="display:flex;gap:5px"><i class="ti ti-antenna-bars-5" aria-hidden="true"></i><i class="ti ti-wifi" aria-hidden="true"></i><i class="ti ti-battery-3" aria-hidden="true"></i></span></div>
+  <div class="pad" style="flex:1">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0 14px">
+      <div>
+        <div class="g" style="font-size:23px;font-weight:700">Hola, Karla</div>
+        <div class="s">domingo 13 de julio</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <i class="ti ti-bell" style="font-size:20px;color:#334155" aria-hidden="true"></i>
+        <div class="tile" style="width:38px;height:38px;border-radius:50%;background:#dbeafe;color:#1e3a8a;font-size:13px">KA</div>
+      </div>
+    </div>
+    <div style="background:#1d4ed8;color:#fff;border-radius:20px;padding:14px 16px">
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700"><i class="ti ti-sparkles" style="font-size:15px" aria-hidden="true"></i>TÁTO notó esto</div>
+      <div style="font-size:14.5px;font-weight:600;line-height:1.4;margin-top:6px">CeraVe Foaming Cleanser podría agotarse en 3 días al ritmo actual.</div>
+      <div style="font-size:12.5px;font-weight:600;margin-top:8px;color:rgba(255,255,255,.85)">Ver producto <i class="ti ti-arrow-right" style="font-size:13px" aria-hidden="true"></i></div>
+    </div>
+    <div class="mrow" style="margin-top:12px">
+      <div class="mtile" style="background:#ccfbf1"><div class="mnum g" style="color:#0f5c4e">12</div><div class="mlab" style="color:#0f766e">Estables</div></div>
+      <div class="mtile" style="background:#fef3c7"><div class="mnum g" style="color:#78350f">4</div><div class="mlab" style="color:#92400e">Atención</div></div>
+      <div class="mtile" style="background:#fee2e2"><div class="mnum g" style="color:#7f1d1d">2</div><div class="mlab" style="color:#991b1b">En riesgo</div></div>
+    </div>
+    <div class="shead"><span class="n" style="font-size:14px">Necesitan atención</span><span class="lnk">Ver todo</span></div>
+    <div class="row"><div class="tile" style="width:40px;height:40px;background:#fce7f3;color:#9d174d;font-size:15px">C</div><div class="grow"><div class="n">CeraVe Cleanser</div><div class="s">Quedan 6 · Belleza</div></div><span class="bdg am">Bajo</span></div>
+    <div class="row"><div class="tile" style="width:40px;height:40px;background:#dbeafe;color:#1e3a8a;font-size:15px">A</div><div class="grow"><div class="n">Agua Kola 20oz</div><div class="s">Sin unidades · Bebidas</div></div><span class="bdg bad">Agotado</span></div>
+  </div>
+  <div class="bn">
+    <span class="bni on"><i class="ti ti-home" aria-hidden="true"></i>Hoy</span>
+    <span class="bni"><i class="ti ti-package" aria-hidden="true"></i>Inventario</span>
+    <span class="scan"><i class="ti ti-scan" aria-hidden="true"></i></span>
+    <span class="bni"><i class="ti ti-chart-bar" aria-hidden="true"></i>Insights</span>
+    <span class="bni"><i class="ti ti-user" aria-hidden="true"></i>Perfil</span>
+  </div>
+</div></div><div class="cap"><b>04 · TÁTO Hoy</b><br>El insight más urgente manda</div></div>
+
+<div class="ph"><div class="bezel"><div class="scr">
+  <div class="stat"><span>9:41</span><span style="display:flex;gap:5px"><i class="ti ti-antenna-bars-5" aria-hidden="true"></i><i class="ti ti-wifi" aria-hidden="true"></i><i class="ti ti-battery-3" aria-hidden="true"></i></span></div>
+  <div class="pad" style="flex:1">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0 12px">
+      <div>
+        <div class="g" style="font-size:23px;font-weight:700">Inventario</div>
+        <div class="s">23 productos</div>
+      </div>
+      <div class="tile" style="width:40px;height:40px;border-radius:14px;background:#1d4ed8;color:#fff"><i class="ti ti-plus" style="font-size:20px" aria-hidden="true"></i></div>
+    </div>
+    <div class="inp"><i class="ti ti-search" aria-hidden="true"></i>Buscar producto…</div>
+    <div style="display:flex;gap:7px;margin:12px 0;overflow:hidden">
+      <span class="chip on">Todos</span><span class="chip">Belleza</span><span class="chip">Bebidas</span>
+      <span class="chip" style="background:#fef3c7;border-color:#fde68a;color:#92400e">Bajo stock</span>
+    </div>
+    <div class="row"><div class="tile" style="width:42px;height:42px;background:#fce7f3;color:#9d174d;font-size:16px">C</div><div class="grow"><div class="n">CeraVe Cleanser</div><div class="s">Belleza</div></div><div style="text-align:right"><div class="n">6</div><span class="bdg am">Bajo</span></div></div>
+    <div class="row"><div class="tile" style="width:42px;height:42px;background:#fce7f3;color:#9d174d;font-size:16px">S</div><div class="grow"><div class="n">Sérum Vitamina C</div><div class="s">Belleza</div></div><div style="text-align:right"><div class="n">14</div><span class="bdg ok">En stock</span></div></div>
+    <div class="row"><div class="tile" style="width:42px;height:42px;background:#dbeafe;color:#1e3a8a;font-size:16px">A</div><div class="grow"><div class="n">Agua Kola 20oz</div><div class="s">Bebidas</div></div><div style="text-align:right"><div class="n">0</div><span class="bdg bad">Agotado</span></div></div>
+    <div class="row"><div class="tile" style="width:42px;height:42px;background:#ccfbf1;color:#0f5c4e;font-size:16px">S</div><div class="grow"><div class="n">Scrunchie Set x3</div><div class="s">Accesorios</div></div><div style="text-align:right"><div class="n">32</div><span class="bdg ok">En stock</span></div></div>
+  </div>
+  <div class="bn">
+    <span class="bni"><i class="ti ti-home" aria-hidden="true"></i>Hoy</span>
+    <span class="bni on"><i class="ti ti-package" aria-hidden="true"></i>Inventario</span>
+    <span class="scan"><i class="ti ti-scan" aria-hidden="true"></i></span>
+    <span class="bni"><i class="ti ti-chart-bar" aria-hidden="true"></i>Insights</span>
+    <span class="bni"><i class="ti ti-user" aria-hidden="true"></i>Perfil</span>
+  </div>
+</div></div><div class="cap"><b>05 · Inventario</b><br>Stock y estado visibles sin abrir nada</div></div>
+
+<div class="ph"><div class="bezel"><div class="scr" style="background:#0f172a;color:#fff">
+  <div class="stat"><span>9:41</span><span style="display:flex;gap:5px"><i class="ti ti-antenna-bars-5" aria-hidden="true"></i><i class="ti ti-wifi" aria-hidden="true"></i><i class="ti ti-battery-3" aria-hidden="true"></i></span></div>
+  <div class="pad" style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+    <span style="font-size:15px;font-weight:600">Escanear producto</span>
+    <i class="ti ti-x" style="font-size:20px;color:#94a3b8" aria-hidden="true"></i>
+  </div>
+  <div style="margin:16px 18px;height:240px;border-radius:24px;background:#1e293b;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px">
+    <div style="position:absolute;top:14px;left:14px;width:26px;height:26px;border-top:3px solid #14b8a6;border-left:3px solid #14b8a6;border-radius:6px 0 0 0"></div>
+    <div style="position:absolute;top:14px;right:14px;width:26px;height:26px;border-top:3px solid #14b8a6;border-right:3px solid #14b8a6;border-radius:0 6px 0 0"></div>
+    <div style="position:absolute;bottom:14px;left:14px;width:26px;height:26px;border-bottom:3px solid #14b8a6;border-left:3px solid #14b8a6;border-radius:0 0 0 6px"></div>
+    <div style="position:absolute;bottom:14px;right:14px;width:26px;height:26px;border-bottom:3px solid #14b8a6;border-right:3px solid #14b8a6;border-radius:0 0 6px 0"></div>
+    <i class="ti ti-camera" style="font-size:42px;color:#475569" aria-hidden="true"></i>
+    <span class="bdg" style="background:rgba(255,255,255,.1);color:#cbd5e1">Encuadra el producto</span>
+  </div>
+  <div style="margin-top:auto;background:#fff;color:#0f172a;border-radius:28px 28px 32px 32px;padding:14px 18px 22px">
+    <div style="width:40px;height:4px;border-radius:99px;background:#e2e8f0;margin:0 auto 14px"></div>
+    <div style="display:flex;align-items:center;gap:11px">
+      <div class="tile" style="width:44px;height:44px;background:#dbeafe;color:#1d4ed8"><i class="ti ti-sparkles" style="font-size:21px" aria-hidden="true"></i></div>
+      <div class="grow"><div class="s">Sugerencia de TÁTO</div><div class="g n" style="font-size:17px;font-weight:700">Cuidado personal</div></div>
+      <span class="bdg ok">92%</span>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <div class="btn" style="flex:1">Confirmar</div>
+      <div class="btn o" style="flex:1">Editar</div>
+    </div>
+    <div class="s" style="text-align:center;margin-top:10px">La IA sugiere, tú siempre confirmas.</div>
+  </div>
+</div></div><div class="cap"><b>06 · Escanear con IA</b><br>Sugerencia clara, decisión del usuario</div></div>
+
+<div class="ph"><div class="bezel"><div class="scr">
+  <div class="stat"><span>9:41</span><span style="display:flex;gap:5px"><i class="ti ti-antenna-bars-5" aria-hidden="true"></i><i class="ti ti-wifi" aria-hidden="true"></i><i class="ti ti-battery-3" aria-hidden="true"></i></span></div>
+  <div class="pad" style="display:flex;flex-direction:column;flex:1">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 12px">
+      <i class="ti ti-arrow-left" style="font-size:20px" aria-hidden="true"></i>
+      <span style="font-size:14px;font-weight:600">Producto</span>
+      <i class="ti ti-edit" style="font-size:19px;color:#64748b" aria-hidden="true"></i>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center">
+      <div class="tile g" style="width:76px;height:76px;background:#fce7f3;color:#9d174d;font-size:32px;border-radius:24px">C</div>
+      <div class="g" style="font-size:19px;font-weight:700;line-height:1.25">CeraVe Foaming Cleanser</div>
+      <div style="display:flex;gap:6px"><span class="bdg pk">Belleza</span><span class="bdg am">Bajo stock</span></div>
+    </div>
+    <div class="mrow" style="margin-top:14px">
+      <div class="mtile" style="background:#fff;border:1px solid #eef2f7"><div class="mnum g" style="font-size:18px">6</div><div class="mlab" style="color:#64748b">Stock</div></div>
+      <div class="mtile" style="background:#fff;border:1px solid #eef2f7"><div class="mnum g" style="font-size:18px">8</div><div class="mlab" style="color:#64748b">Mínimo</div></div>
+      <div class="mtile" style="background:#fee2e2"><div class="mnum g" style="font-size:18px;color:#7f1d1d">~3 días</div><div class="mlab" style="color:#991b1b">Se agota</div></div>
+    </div>
+    <div class="row" style="margin-top:12px;justify-content:space-between">
+      <div style="text-align:center;flex:1"><div class="s">Costo</div><div class="n">RD$450</div></div>
+      <div style="width:1px;height:28px;background:#eef2f7"></div>
+      <div style="text-align:center;flex:1"><div class="s">Venta</div><div class="n">RD$750</div></div>
+      <div style="width:1px;height:28px;background:#eef2f7"></div>
+      <div style="text-align:center;flex:1"><div class="s">Margen</div><div class="n" style="color:#0f766e">40%</div></div>
+    </div>
+    <div class="shead"><span class="n" style="font-size:14px">Historial</span><span class="lnk">Ver todo</span></div>
+    <div class="row" style="padding:8px 12px"><div class="tile" style="width:30px;height:30px;border-radius:50%;background:#ccfbf1;color:#0f766e"><i class="ti ti-arrow-down" style="font-size:15px" aria-hidden="true"></i></div><div class="grow"><div class="n" style="font-size:12.5px">Entrada · Compra</div><div class="s">2 jul</div></div><span class="n" style="color:#0f766e">+12</span></div>
+    <div class="row" style="padding:8px 12px"><div class="tile" style="width:30px;height:30px;border-radius:50%;background:#fee2e2;color:#991b1b"><i class="ti ti-arrow-up" style="font-size:15px" aria-hidden="true"></i></div><div class="grow"><div class="n" style="font-size:12.5px">Salida · Venta</div><div class="s">10 jul</div></div><span class="n" style="color:#991b1b">−3</span></div>
+    <div style="margin-top:auto;padding-bottom:18px"><div class="btn">Registrar movimiento</div></div>
+  </div>
+</div></div><div class="cap"><b>07 · Detalle de producto</b><br>Estado, margen e historial en una vista</div></div>
+
+<div class="ph"><div class="bezel"><div class="scr">
+  <div class="stat"><span>9:41</span><span style="display:flex;gap:5px"><i class="ti ti-antenna-bars-5" aria-hidden="true"></i><i class="ti ti-wifi" aria-hidden="true"></i><i class="ti ti-battery-3" aria-hidden="true"></i></span></div>
+  <div class="pad" style="display:flex;flex-direction:column;flex:1">
+    <div style="display:flex;align-items:center;gap:10px;margin:8px 0 2px">
+      <i class="ti ti-arrow-left" style="font-size:20px" aria-hidden="true"></i>
+      <span style="font-size:15px;font-weight:600">Nuevo movimiento</span>
+    </div>
+    <div class="seg"><div><i class="ti ti-arrow-down" style="font-size:13px" aria-hidden="true"></i> Entrada</div><div class="on"><i class="ti ti-arrow-up" style="font-size:13px" aria-hidden="true"></i> Salida</div><div>Ajuste</div></div>
+    <div class="row" style="margin-top:14px"><div class="tile" style="width:40px;height:40px;background:#fce7f3;color:#9d174d;font-size:15px">C</div><div class="grow"><div class="n">CeraVe Foaming Cleanser</div><div class="s">Stock disponible: 6</div></div><i class="ti ti-chevron-down" style="color:#94a3b8" aria-hidden="true"></i></div>
+    <div class="lab">Cantidad</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:22px;margin:6px 0">
+      <div class="tile" style="width:46px;height:46px;border-radius:50%;background:#fff;border:1.5px solid #e2e8f0;font-size:20px">−</div>
+      <div class="g" style="font-size:42px;font-weight:700">2</div>
+      <div class="tile" style="width:46px;height:46px;border-radius:50%;background:#1d4ed8;color:#fff;font-size:20px">+</div>
+    </div>
+    <div style="text-align:center"><span class="bdg blu">Quedarán 4 unidades</span></div>
+    <div class="lab">Motivo</div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap">
+      <span class="chip on">Venta</span><span class="chip">Merma</span><span class="chip">Regalo</span><span class="chip">Otro</span>
+    </div>
+    <div class="lab">Nota (opcional)</div>
+    <div class="inp">Pedido de Instagram…</div>
+    <div style="margin-top:auto;padding-bottom:18px"><div class="btn">Guardar salida</div></div>
+  </div>
+</div></div><div class="cap"><b>08 · Registrar movimiento</b><br>Stepper grande y validación en vivo</div></div>
+
+<div class="ph"><div class="bezel"><div class="scr">
+  <div class="stat"><span>9:41</span><span style="display:flex;gap:5px"><i class="ti ti-antenna-bars-5" aria-hidden="true"></i><i class="ti ti-wifi" aria-hidden="true"></i><i class="ti ti-battery-3" aria-hidden="true"></i></span></div>
+  <div class="pad" style="flex:1">
+    <div style="margin:10px 0 12px">
+      <div class="g" style="font-size:23px;font-weight:700">Insights</div>
+      <div class="s">Últimos 14 días</div>
+    </div>
+    <div style="background:#ede9fe;border-radius:20px;padding:14px 16px">
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#5b21b6"><i class="ti ti-cash" style="font-size:15px" aria-hidden="true"></i>Dinero inmovilizado</div>
+      <div class="g" style="font-size:28px;font-weight:700;color:#4c1d95;margin-top:4px">RD$10,450</div>
+      <div style="font-size:12px;color:#6d28d9;margin-top:2px">En 5 productos sin salidas recientes</div>
+    </div>
+    <div class="shead"><span class="n" style="font-size:14px">Por agotarse</span></div>
+    <div class="row"><div class="grow"><div class="n">CeraVe Cleanser</div><div class="s">Quedan 6 · salen 2 al día</div></div><span class="bdg bad">~3 días</span></div>
+    <div class="row"><div class="grow"><div class="n">Sérum Vitamina C</div><div class="s">Quedan 14 · salen 2 al día</div></div><span class="bdg am">~7 días</span></div>
+    <div class="shead"><span class="n" style="font-size:14px">Se mueven rápido</span></div>
+    <div class="row"><div class="grow"><div class="n">Scrunchie Set x3</div><div class="s">18 salidas esta semana</div></div><span class="bdg ok"><i class="ti ti-trending-up" aria-hidden="true"></i>×3</span></div>
+    <div class="shead"><span class="n" style="font-size:14px">Sin movimiento</span></div>
+    <div class="row"><div class="grow"><div class="n">Mascarilla Aloe</div><div class="s">RD$2,800 parados</div></div><span class="bdg gy">45 días</span></div>
+  </div>
+  <div class="bn">
+    <span class="bni"><i class="ti ti-home" aria-hidden="true"></i>Hoy</span>
+    <span class="bni"><i class="ti ti-package" aria-hidden="true"></i>Inventario</span>
+    <span class="scan"><i class="ti ti-scan" aria-hidden="true"></i></span>
+    <span class="bni on"><i class="ti ti-chart-bar" aria-hidden="true"></i>Insights</span>
+    <span class="bni"><i class="ti ti-user" aria-hidden="true"></i>Perfil</span>
+  </div>
+</div></div><div class="cap"><b>09 · Insights</b><br>Decisiones, no gráficas decorativas</div></div>
+
+<div class="ph"><div class="bezel"><div class="scr">
+  <div class="stat"><span>9:41</span><span style="display:flex;gap:5px"><i class="ti ti-antenna-bars-5" aria-hidden="true"></i><i class="ti ti-wifi" aria-hidden="true"></i><i class="ti ti-battery-3" aria-hidden="true"></i></span></div>
+  <div class="pad" style="flex:1">
+    <div class="g" style="font-size:23px;font-weight:700;margin:10px 0 14px">Perfil</div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:16px">
+      <div class="tile" style="width:64px;height:64px;border-radius:50%;background:#dbeafe;color:#1e3a8a;font-size:20px">KA</div>
+      <div class="g" style="font-size:17px;font-weight:700;margin-top:6px">Karla Núñez</div>
+      <div class="s">karla@negocio.do</div>
+    </div>
+    <div class="row"><div class="tile" style="width:44px;height:44px;background:#ccfbf1;color:#0f766e"><i class="ti ti-building-store" style="font-size:20px" aria-hidden="true"></i></div><div class="grow"><div class="n">Glow Skincare RD</div><div class="s">Belleza · Pesos (DOP)</div></div><span class="lnk">Editar</span></div>
+    <div class="row"><i class="ti ti-bell" style="font-size:19px;color:#334155" aria-hidden="true"></i><div class="grow"><div class="n">Notificaciones</div></div><span style="width:40px;height:24px;border-radius:99px;background:#14b8a6;position:relative;display:inline-block"><span style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:#fff"></span></span></div>
+    <div class="row"><i class="ti ti-cloud-check" style="font-size:19px;color:#0f766e" aria-hidden="true"></i><div class="grow"><div class="n">Sincronización</div></div><span class="s" style="color:#0f766e;font-weight:600">Al día</span></div>
+    <div class="row"><i class="ti ti-crown" style="font-size:19px;color:#7c3aed" aria-hidden="true"></i><div class="grow"><div class="n">Plan Free</div><div class="s">Hasta 30 productos</div></div><span class="bdg lil">Mejorar a Pro</span></div>
+    <div class="row"><i class="ti ti-logout" style="font-size:19px;color:#991b1b" aria-hidden="true"></i><div class="grow"><div class="n" style="color:#991b1b">Cerrar sesión</div></div></div>
+    <div class="s" style="text-align:center;margin-top:12px;font-size:11px">TÁTO 1.0 · Hecho en República Dominicana</div>
+  </div>
+  <div class="bn">
+    <span class="bni"><i class="ti ti-home" aria-hidden="true"></i>Hoy</span>
+    <span class="bni"><i class="ti ti-package" aria-hidden="true"></i>Inventario</span>
+    <span class="scan"><i class="ti ti-scan" aria-hidden="true"></i></span>
+    <span class="bni"><i class="ti ti-chart-bar" aria-hidden="true"></i>Insights</span>
+    <span class="bni on"><i class="ti ti-user" aria-hidden="true"></i>Perfil</span>
+  </div>
+</div></div><div class="cap"><b>10 · Perfil y configuración</b><br>Cuenta, negocio, sync y plan en un lugar</div></div>
+
+</div>
+</div>
+</body>
+</html>
