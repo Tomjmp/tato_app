@@ -9,6 +9,8 @@ import 'package:tato_app/features/movements/domain/entities/inventory_movement.d
 import 'package:tato_app/shared/widgets/empty_state.dart';
 import 'package:tato_app/shared/widgets/error_state.dart';
 import 'package:tato_app/shared/widgets/movement_tile.dart';
+import 'package:tato_app/shared/widgets/product_avatar.dart';
+import 'package:tato_app/shared/widgets/stock_badge.dart';
 
 class HoyScreen extends ConsumerStatefulWidget {
   const HoyScreen({super.key});
@@ -38,10 +40,39 @@ class _HoyScreenState extends ConsumerState<HoyScreen> {
     ]);
   }
 
+  String _todayLabel() {
+    const weekdays = [
+      'lunes',
+      'martes',
+      'miércoles',
+      'jueves',
+      'viernes',
+      'sábado',
+      'domingo',
+    ];
+    const months = [
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre',
+    ];
+    final now = DateTime.now();
+    return '${weekdays[now.weekday - 1]} ${now.day} de ${months[now.month - 1]}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final calculateInsights = ref.watch(calculateInsightsUseCaseProvider);
+    final firstName = (user?.name ?? '').split(' ').first;
 
     return Scaffold(
       backgroundColor: TatoColors.background,
@@ -56,38 +87,41 @@ class _HoyScreenState extends ConsumerState<HoyScreen> {
               sliver: SliverToBoxAdapter(
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor: TatoColors.primaryContainer,
-                      child: Text(
-                        (user?.name?.isNotEmpty ?? false)
-                            ? user!.name![0].toUpperCase()
-                            : 'U',
-                        style: const TextStyle(
-                          color: TatoColors.onPrimaryContainer,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: TatoSpacing.sm),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Hola ${user?.name ?? ''} 👋',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(color: TatoColors.onSurfaceVariant),
+                            firstName.isEmpty ? 'Hola' : 'Hola, $firstName',
+                            style:
+                                Theme.of(context).textTheme.headlineSmall,
                           ),
-                          Text('TÁTO', style: Theme.of(context).textTheme.headlineMedium),
+                          Text(
+                            _todayLabel(),
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
                         ],
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () => context.go('/profile'),
+                      icon: const Icon(Icons.notifications_outlined),
+                      onPressed: () => context.go('/insights'),
+                    ),
+                    GestureDetector(
+                      onTap: () => context.go('/profile'),
+                      child: CircleAvatar(
+                        radius: 19,
+                        backgroundColor: TatoColors.primaryContainer,
+                        child: Text(
+                          (user?.name?.isNotEmpty ?? false)
+                              ? user!.name![0].toUpperCase()
+                              : 'U',
+                          style: const TextStyle(
+                            color: TatoColors.onPrimaryContainer,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -115,62 +149,89 @@ class _HoyScreenState extends ConsumerState<HoyScreen> {
                       products: products,
                       movements: movements,
                     );
-                    final today = DateTime.now();
-                    final movementsToday = movements
-                        .where((m) =>
-                            m.date.year == today.year &&
-                            m.date.month == today.month &&
-                            m.date.day == today.day)
-                        .length;
+                    final attention = products
+                        .where((p) => p.needsAttention)
+                        .toList()
+                      ..sort(
+                          (a, b) => a.currentStock.compareTo(b.currentStock));
                     final recentMovements = [...movements]
                       ..sort((a, b) => b.date.compareTo(a.date));
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _StatusHeroCard(insight: insight),
+                        _HeroCard(insight: insight),
                         const SizedBox(height: TatoSpacing.sm),
                         Row(
                           children: [
                             Expanded(
-                              child: _StatTile(
-                                label: 'Productos',
-                                value: '${insight.totalProducts}',
+                              child: _MiniStat(
+                                value: '${insight.healthyProducts}',
+                                label: 'Estables',
+                                background: TatoColors.mintTint,
+                                foreground: TatoColors.onMintTint,
                               ),
                             ),
                             const SizedBox(width: TatoSpacing.xs),
                             Expanded(
-                              child: _StatTile(
+                              child: _MiniStat(
+                                value: '${insight.lowStockProducts.length}',
+                                label: 'Atención',
+                                background: TatoColors.amberTint,
+                                foreground: TatoColors.onAmberTint,
+                              ),
+                            ),
+                            const SizedBox(width: TatoSpacing.xs),
+                            Expanded(
+                              child: _MiniStat(
+                                value: '${insight.outOfStockProducts.length}',
                                 label: 'En riesgo',
-                                value: '${insight.alertCount}',
-                                color: insight.hasAlerts
-                                    ? TatoColors.warning
-                                    : TatoColors.success,
+                                background: TatoColors.coralTint,
+                                foreground: TatoColors.onCoralTint,
                               ),
-                            ),
-                            const SizedBox(width: TatoSpacing.xs),
-                            Expanded(
-                              child: _StatTile(label: 'Hoy', value: '$movementsToday'),
                             ),
                           ],
                         ),
-                        if (insight.mostUrgentDepletion != null) ...[
-                          const SizedBox(height: TatoSpacing.xl),
-                          Text('TÁTO notó esto',
-                              style: Theme.of(context).textTheme.titleLarge),
-                          const SizedBox(height: TatoSpacing.sm),
-                          _FeaturedInsightCard(
-                            velocity: insight.mostUrgentDepletion!,
-                            onViewDetail: () => context
-                                .push('/inventory/${insight.mostUrgentDepletion!.product.id}'),
+                        if (attention.isNotEmpty) ...[
+                          const SizedBox(height: TatoSpacing.lg),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text('Necesitan atención',
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium),
+                              ),
+                              TextButton(
+                                onPressed: () => context.go('/inventory'),
+                                child: const Text('Ver todo'),
+                              ),
+                            ],
                           ),
+                          const SizedBox(height: TatoSpacing.unit),
+                          ...attention.take(3).map(
+                                (p) => Padding(
+                                  padding: const EdgeInsets.only(
+                                      bottom: TatoSpacing.xs),
+                                  child: _AttentionRow(
+                                    product: p,
+                                    onTap: () =>
+                                        context.push('/inventory/${p.id}'),
+                                  ),
+                                ),
+                              ),
                         ],
-                        const SizedBox(height: TatoSpacing.xl),
+                        const SizedBox(height: TatoSpacing.lg),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Movimientos recientes',
-                                style: Theme.of(context).textTheme.titleLarge),
+                            Expanded(
+                              child: Text('Movimientos recientes',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium),
+                            ),
                             TextButton(
                               onPressed: () => context.go('/insights'),
                               child: const Text('Ver todos'),
@@ -187,17 +248,28 @@ class _HoyScreenState extends ConsumerState<HoyScreen> {
                           Container(
                             decoration: BoxDecoration(
                               color: TatoColors.surface,
-                              borderRadius: BorderRadius.circular(TatoSizes.radiusXl),
+                              borderRadius:
+                                  BorderRadius.circular(TatoSizes.radiusLg),
                               border: Border.all(color: TatoColors.border),
-                              boxShadow: TatoShadows.level1,
                             ),
                             child: Column(
-                              children: recentMovements.take(4).toList().asMap().entries.map((e) {
+                              children: recentMovements
+                                  .take(4)
+                                  .toList()
+                                  .asMap()
+                                  .entries
+                                  .map((e) {
                                 return Column(
                                   children: [
-                                    MovementTile(movement: e.value, showProductName: true),
-                                    if (e.key < recentMovements.take(4).length - 1)
-                                      const Divider(height: 1, indent: 16, endIndent: 16),
+                                    MovementTile(
+                                        movement: e.value,
+                                        showProductName: true),
+                                    if (e.key <
+                                        recentMovements.take(4).length - 1)
+                                      const Divider(
+                                          height: 1,
+                                          indent: 16,
+                                          endIndent: 16),
                                   ],
                                 );
                               }).toList(),
@@ -217,170 +289,240 @@ class _HoyScreenState extends ConsumerState<HoyScreen> {
   }
 }
 
-class _StatusHeroCard extends StatelessWidget {
+/// Tarjeta héroe "TÁTO notó esto": siempre lo primero después del saludo.
+/// Azul pleno cuando hay algo urgente que decir; tinte azul claro con
+/// mensaje neutro cuando el inventario está estable.
+class _HeroCard extends StatelessWidget {
   final StockInsight insight;
 
-  const _StatusHeroCard({required this.insight});
+  const _HeroCard({required this.insight});
 
   @override
   Widget build(BuildContext context) {
-    final stable = !insight.hasAlerts;
-    final color = stable ? TatoColors.success : TatoColors.warning;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(TatoSpacing.md),
-      decoration: BoxDecoration(
-        color: TatoColors.surface,
-        borderRadius: BorderRadius.circular(TatoSizes.radiusXl),
-        border: Border.all(color: TatoColors.border),
-        boxShadow: TatoShadows.level1,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    final urgent = insight.mostUrgentDepletion;
+    final stable = urgent == null && !insight.hasAlerts;
+
+    if (stable) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(TatoSpacing.md),
+        decoration: BoxDecoration(
+          color: TatoColors.primaryContainer,
+          borderRadius: BorderRadius.circular(TatoSizes.radiusHero),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
               children: [
+                Icon(Icons.auto_awesome_outlined,
+                    size: 15, color: TatoColors.onPrimaryContainer),
+                SizedBox(width: 6),
                 Text(
-                  stable ? 'Tu inventario está estable' : 'Necesitas revisar tu inventario',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  stable
-                      ? 'Sin alertas críticas por ahora.'
-                      : '${insight.alertCount} producto(s) necesitan tu atención.',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(color: TatoColors.onSurfaceVariant),
+                  'TÁTO notó esto',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: TatoColors.onPrimaryContainer,
+                  ),
                 ),
               ],
             ),
-          ),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(color: color.withOpacity(0.12), shape: BoxShape.circle),
-            child: Icon(stable ? Icons.check_circle_outline : Icons.warning_amber_outlined,
-                color: color),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatTile extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color? color;
-
-  const _StatTile({required this.label, required this.value, this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: TatoSpacing.sm),
-      decoration: BoxDecoration(
-        color: TatoColors.surface,
-        borderRadius: BorderRadius.circular(TatoSizes.radiusMd),
-        border: Border.all(color: TatoColors.border),
-      ),
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontSize: 22,
-                  color: color ?? TatoColors.primary,
-                ),
-          ),
-          Text(label, style: Theme.of(context).textTheme.labelMedium),
-        ],
-      ),
-    );
-  }
-}
-
-class _FeaturedInsightCard extends StatelessWidget {
-  final ProductVelocity velocity;
-  final VoidCallback onViewDetail;
-
-  const _FeaturedInsightCard({required this.velocity, required this.onViewDetail});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(TatoSpacing.md),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [TatoColors.primary, Color(0xFF1E3A8A)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+            const SizedBox(height: 6),
+            const Text(
+              'Tu inventario está estable. Sin alertas críticas por ahora.',
+              style: TextStyle(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w600,
+                height: 1.4,
+                color: TatoColors.onPrimaryContainer,
+              ),
+            ),
+          ],
         ),
-        borderRadius: BorderRadius.circular(TatoSizes.radiusXl),
-        boxShadow: TatoShadows.level2,
+      );
+    }
+
+    final message = urgent != null
+        ? '${urgent.product.name} podría agotarse en '
+            '${urgent.estimatedDaysRemaining == 1 ? '1 día' : '${urgent.estimatedDaysRemaining} días'} '
+            'al ritmo actual.'
+        : '${insight.alertCount} '
+            '${insight.alertCount == 1 ? 'producto necesita' : 'productos necesitan'} '
+            'tu atención hoy.';
+    final onTap = urgent != null
+        ? () => context.push('/inventory/${urgent.product.id}')
+        : () => context.go('/inventory');
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(TatoSpacing.md),
+        decoration: BoxDecoration(
+          color: TatoColors.primary,
+          borderRadius: BorderRadius.circular(TatoSizes.radiusHero),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.auto_awesome_outlined,
+                    size: 15, color: Colors.white),
+                SizedBox(width: 6),
+                Text(
+                  'TÁTO notó esto',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              message,
+              style: const TextStyle(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w600,
+                height: 1.4,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Text(
+                  urgent != null ? 'Ver producto' : 'Ver inventario',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withOpacity(0.85),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(Icons.arrow_forward,
+                    size: 13, color: Colors.white.withOpacity(0.85)),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Semáforo del inventario: número grande + etiqueta, sobre tinte de estado.
+class _MiniStat extends StatelessWidget {
+  final String value;
+  final String label;
+  final Color background;
+  final Color foreground;
+
+  const _MiniStat({
+    required this.value,
+    required this.label,
+    required this.background,
+    required this.foreground,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(TatoSpacing.sm),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(TatoSizes.radiusLg),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.18),
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: const Text(
-                  'ALERTA DE STOCK',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.4,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: TatoSpacing.sm),
           Text(
-            velocity.product.name,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+            value,
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(color: foreground),
           ),
-          const SizedBox(height: 4),
           Text(
-            'podría agotarse en '
-            '${velocity.estimatedDaysRemaining == 1 ? '1 día' : '${velocity.estimatedDaysRemaining} días'} '
-            'según tus ventas recientes.',
-            style: TextStyle(color: Colors.white.withOpacity(0.88), fontSize: 13, height: 1.4),
-          ),
-          const SizedBox(height: TatoSpacing.md),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: TatoColors.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(TatoSizes.radiusMd),
-                ),
-              ),
-              onPressed: onViewDetail,
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Ver detalle', style: TextStyle(fontWeight: FontWeight.w700)),
-                  SizedBox(width: 6),
-                  Icon(Icons.arrow_forward, size: 16),
-                ],
-              ),
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: foreground,
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AttentionRow extends StatelessWidget {
+  final Product product;
+  final VoidCallback onTap;
+
+  const _AttentionRow({required this.product, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final stock = product.currentStock;
+    final quantity = stock <= 0
+        ? 'Sin unidades'
+        : 'Quedan ${stock == stock.roundToDouble() ? stock.toInt() : stock}';
+    final subtitle = product.categoryName == null
+        ? quantity
+        : '$quantity · ${product.categoryName}';
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(TatoSizes.radiusLg),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: TatoSpacing.sm,
+          vertical: 10,
+        ),
+        decoration: BoxDecoration(
+          color: TatoColors.surface,
+          borderRadius: BorderRadius.circular(TatoSizes.radiusLg),
+          border: Border.all(color: TatoColors.border),
+        ),
+        child: Row(
+          children: [
+            ProductAvatar(
+              imageUrl: product.imageUrl,
+              categoryName: product.categoryName,
+              size: 40,
+            ),
+            const SizedBox(width: TatoSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      color: TatoColors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            StockBadge(status: product.status, dense: true),
+          ],
+        ),
       ),
     );
   }
