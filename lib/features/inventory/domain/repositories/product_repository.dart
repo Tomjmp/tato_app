@@ -2,8 +2,8 @@
 
 abstract interface class ProductRepository {
   Future<List<Product>> getProducts();
-  Future<Product?> getProductById(String localId);
+  Future<Product?> getProductById(String id);
   Future<void> saveProduct(Product product);
-  Future<void> deleteProduct(String localId);
+  Future<void> deleteProduct(String id);
   Stream<List<Product>> watchProducts();
 }

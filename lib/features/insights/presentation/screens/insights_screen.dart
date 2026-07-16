@@ -7,39 +7,59 @@ import 'package:tato_app/features/inventory/domain/entities/product.dart';
 import 'package:tato_app/features/insights/domain/entities/stock_insight.dart';
 import 'package:tato_app/features/movements/domain/entities/inventory_movement.dart';
 import 'package:tato_app/shared/widgets/empty_state.dart';
+import 'package:tato_app/shared/widgets/error_state.dart';
 import 'package:tato_app/shared/widgets/insight_card.dart';
 import 'package:tato_app/shared/widgets/product_avatar.dart';
 
-class InsightsScreen extends ConsumerWidget {
+class InsightsScreen extends ConsumerStatefulWidget {
   const InsightsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final productRepo = ref.watch(productRepositoryProvider);
-    final movementRepo = ref.watch(movementRepositoryProvider);
+  ConsumerState<InsightsScreen> createState() => _InsightsScreenState();
+}
+
+class _InsightsScreenState extends ConsumerState<InsightsScreen> {
+  late Future<List<Object>> _dataFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Cached once instead of rebuilt inside build() for the same reason
+    // as Hoy/Perfil: avoids re-fetching (and flashing to loading state)
+    // on every rebuild triggered by unrelated provider changes.
+    final productRepo = ref.read(productRepositoryProvider);
+    final movementRepo = ref.read(movementRepositoryProvider);
+    _dataFuture = Future.wait([
+      productRepo.getProducts(),
+      movementRepo.getMovements(),
+    ]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final calculateInsights = ref.watch(calculateInsightsUseCaseProvider);
 
     return Scaffold(
       backgroundColor: TatoColors.background,
       body: SafeArea(
         child: FutureBuilder<List<Object>>(
-          future: Future.wait([
-            productRepo.getProducts(),
-            movementRepo.getMovements(),
-          ]),
+          future: _dataFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return const ErrorState();
             }
             final products = (snapshot.data?[0] as List<Product>?) ?? [];
             final movements =
                 (snapshot.data?[1] as List<InventoryMovement>?) ?? [];
 
             if (products.isEmpty) {
-              return Column(
+              return const Column(
                 children: [
-                  _TopBar(onMenu: () => context.go('/profile')),
-                  const Expanded(
+                  _Header(),
+                  Expanded(
                     child: EmptyState(
                       icon: Icons.insights_outlined,
                       title: 'Aún no hay datos suficientes',
@@ -55,7 +75,7 @@ class InsightsScreen extends ConsumerWidget {
 
             return CustomScrollView(
               slivers: [
-                SliverToBoxAdapter(child: _TopBar(onMenu: () => context.go('/profile'))),
+                const SliverToBoxAdapter(child: _Header()),
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: TatoSpacing.containerPadding,
@@ -64,15 +84,6 @@ class InsightsScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'RESUMEN GENERAL',
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelMedium
-                              ?.copyWith(letterSpacing: 1),
-                        ),
-                        Text('Insights', style: Theme.of(context).textTheme.headlineLarge),
-                        const SizedBox(height: TatoSpacing.lg),
                         _CapitalHeroCard(insight: insight),
                         const SizedBox(height: TatoSpacing.md),
                         _WeeklySalesCard(dailyUnits: weeklySales),
@@ -83,24 +94,24 @@ class InsightsScreen extends ConsumerWidget {
                           Padding(
                             padding: const EdgeInsets.only(bottom: TatoSpacing.sm),
                             child: _OpportunityCard(
-                              tag: 'MÁS VENDIDO',
+                              tag: 'Se mueve rápido',
                               tagColor: TatoColors.success,
                               icon: Icons.bolt_outlined,
                               velocity: v,
                               metric: '${v.unitsPerDay.toStringAsFixed(1)} uds./día',
-                              onTap: () => context.push('/inventory/${v.product.localId}'),
+                              onTap: () => context.push('/inventory/${v.product.id}'),
                             ),
                           ),
                         for (final v in insight.slowMovingProducts)
                           Padding(
                             padding: const EdgeInsets.only(bottom: TatoSpacing.sm),
                             child: _OpportunityCard(
-                              tag: 'SIN MOVIMIENTO',
+                              tag: 'Sin movimiento',
                               tagColor: TatoColors.onSurfaceVariant,
                               icon: Icons.hourglass_disabled_outlined,
                               velocity: v,
                               metric: 'Sin ventas en 14 días',
-                              onTap: () => context.push('/inventory/${v.product.localId}'),
+                              onTap: () => context.push('/inventory/${v.product.id}'),
                             ),
                           ),
                         if (insight.fastMovingProducts.isEmpty && insight.slowMovingProducts.isEmpty)
@@ -154,7 +165,7 @@ class InsightsScreen extends ConsumerWidget {
                                     subtitle: v.depletionMessage,
                                     color: TatoColors.warning,
                                     onTap: () => context
-                                        .push('/inventory/${v.product.localId}'),
+                                        .push('/inventory/${v.product.id}'),
                                   ))
                               .toList(),
                         ),
@@ -186,32 +197,29 @@ class InsightsScreen extends ConsumerWidget {
   }
 }
 
-class _TopBar extends StatelessWidget {
-  final VoidCallback onMenu;
-
-  const _TopBar({required this.onMenu});
+class _Header extends StatelessWidget {
+  const _Header();
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: TatoSpacing.containerPadding,
-        vertical: TatoSpacing.md,
+      padding: const EdgeInsets.fromLTRB(
+        TatoSpacing.containerPadding,
+        TatoSpacing.md,
+        TatoSpacing.containerPadding,
+        TatoSpacing.sm,
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IconButton(icon: const Icon(Icons.menu), onPressed: onMenu),
-          Expanded(
-            child: Text('TÁTO',
-                textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text('Insights',
+                style: Theme.of(context).textTheme.headlineSmall),
           ),
-          GestureDetector(
-            onTap: onMenu,
-            child: const CircleAvatar(
-              radius: 16,
-              backgroundColor: TatoColors.primaryContainer,
-              child: Icon(Icons.person_outline, size: 18, color: TatoColors.onPrimaryContainer),
-            ),
+          Text(
+            'Qué reponer, qué aprovechar y qué revisar.',
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
         ],
       ),
@@ -219,6 +227,9 @@ class _TopBar extends StatelessWidget {
   }
 }
 
+/// Métrica héroe en lila (el color del valor inteligente): dinero
+/// inmovilizado cuando hay productos sin salidas recientes; si aún no hay
+/// historial suficiente, muestra el valor total del inventario.
 class _CapitalHeroCard extends StatelessWidget {
   final StockInsight insight;
 
@@ -226,44 +237,56 @@ class _CapitalHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lockedMoney = insight.slowMovingProducts
+        .fold<double>(0, (sum, v) => sum + v.product.totalValue);
+    final hasLocked = lockedMoney > 0;
+    final amount = hasLocked ? lockedMoney : insight.totalInventoryValue;
+    final label = hasLocked ? 'Dinero inmovilizado' : 'Dinero en inventario';
+    final caption = hasLocked
+        ? 'En ${insight.slowMovingProducts.length} '
+            '${insight.slowMovingProducts.length == 1 ? 'producto' : 'productos'} '
+            'sin salidas recientes'
+        : 'Valor total de tu inventario a precio de costo';
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(TatoSpacing.lg),
+      padding: const EdgeInsets.all(TatoSpacing.md),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [TatoColors.primary, Color(0xFF1E3A8A)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(TatoSizes.radiusXl),
-        boxShadow: TatoShadows.level2,
+        color: TatoColors.lilaTint,
+        borderRadius: BorderRadius.circular(TatoSizes.radiusHero),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Dinero en inventario',
-              style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 4),
-          Text(
-            'RD\$ ${insight.totalInventoryValue.toStringAsFixed(0)}',
-            style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
           Row(
             children: [
-              Icon(
-                insight.hasAlerts ? Icons.warning_amber_rounded : Icons.check_circle_outline,
-                color: Colors.white,
-                size: 16,
-              ),
-              const SizedBox(width: 4),
+              const Icon(Icons.payments_outlined,
+                  size: 15, color: TatoColors.onLilaTint),
+              const SizedBox(width: 6),
               Text(
-                insight.hasAlerts
-                    ? '${insight.alertCount} alertas activas'
-                    : 'Sin alertas activas',
-                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                label,
+                style: const TextStyle(
+                  color: TatoColors.onLilaTint,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'RD\$ ${amount.toStringAsFixed(0)}',
+            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  color: const Color(0xFF4C1D95),
+                ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            caption,
+            style: const TextStyle(
+              color: Color(0xFF6D28D9),
+              fontSize: 12,
+            ),
           ),
         ],
       ),
@@ -295,7 +318,7 @@ class _WeeklySalesCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Ventas Semanales', style: Theme.of(context).textTheme.titleMedium),
+          Text('Salidas de la semana', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: TatoSpacing.md),
           SizedBox(
             height: 96,
@@ -398,7 +421,7 @@ class _OpportunityCard extends StatelessWidget {
                 children: [
                   Text(tag,
                       style: TextStyle(
-                          fontSize: 10, fontWeight: FontWeight.w700, color: tagColor, letterSpacing: 0.4)),
+                          fontSize: 11, fontWeight: FontWeight.w700, color: tagColor)),
                   Text(velocity.product.name,
                       style: Theme.of(context).textTheme.titleMedium, overflow: TextOverflow.ellipsis),
                   Text(metric,

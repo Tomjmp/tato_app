@@ -7,6 +7,7 @@ import 'package:tato_app/features/inventory/domain/entities/product.dart';
 import 'package:tato_app/features/movements/domain/entities/inventory_movement.dart';
 import 'package:tato_app/shared/widgets/custom_button.dart';
 import 'package:tato_app/shared/widgets/empty_state.dart';
+import 'package:tato_app/shared/widgets/error_state.dart';
 import 'package:tato_app/shared/widgets/movement_tile.dart';
 import 'package:tato_app/shared/widgets/product_avatar.dart';
 import 'package:tato_app/shared/widgets/stock_badge.dart';
@@ -43,6 +44,18 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     await Future.wait([_productFuture, _movementsFuture]);
   }
 
+  /// Días estimados hasta agotarse según las salidas de los últimos 14 días.
+  /// Misma fórmula del motor de insights: stock / promedio diario de salida.
+  int? _daysToDeplete(Product product, List<InventoryMovement> movements) {
+    if (product.currentStock <= 0) return 0;
+    final since = DateTime.now().subtract(const Duration(days: 14));
+    final exits = movements
+        .where((m) => m.isExit && m.date.isAfter(since))
+        .fold<double>(0, (sum, m) => sum + m.quantity);
+    if (exits <= 0) return null;
+    return (product.currentStock / (exits / 14)).ceil();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,6 +66,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
+          if (snapshot.hasError) {
+            return Scaffold(
+              appBar: AppBar(backgroundColor: TatoColors.background, elevation: 0),
+              body: const ErrorState(),
+            );
+          }
           final product = snapshot.data;
           if (product == null) {
             return Scaffold(
@@ -61,7 +80,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             );
           }
 
-          final statusColor = StockBadge.colorFor(product.status);
+          final categoryColor = TatoCategories.colorFor(product.categoryName);
+          final margin = product.price > 0
+              ? ((product.price - product.cost) / product.price * 100)
+              : null;
 
           return RefreshIndicator(
             onRefresh: _refresh,
@@ -74,14 +96,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     icon: const Icon(Icons.arrow_back_ios_new_rounded),
                     onPressed: () => context.pop(),
                   ),
-                  title: Text(product.name,
-                      style: Theme.of(context).textTheme.titleLarge,
-                      overflow: TextOverflow.ellipsis),
+                  title: const Text('Producto'),
+                  centerTitle: true,
                   actions: [
                     IconButton(
                       icon: const Icon(Icons.edit_outlined),
                       onPressed: () async {
-                        await context.push('/inventory/${product.localId}/edit');
+                        await context.push('/inventory/${product.id}/edit');
                         if (mounted) _refresh();
                       },
                     ),
@@ -95,144 +116,179 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         child: ProductAvatar(
                           imageUrl: product.imageUrl,
                           categoryName: product.categoryName,
-                          size: 88,
+                          size: 80,
                           radius: TatoSizes.radiusXl,
                         ),
                       ),
-                      const SizedBox(height: TatoSpacing.md),
-                      // Stock hero card
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(TatoSpacing.lg),
-                        decoration: BoxDecoration(
-                          color: statusColor.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(TatoSizes.radiusXl),
-                          border: Border.all(color: statusColor.withOpacity(0.3)),
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              '${product.currentStock.toInt()}',
-                              style: TextStyle(
-                                fontSize: 56,
-                                fontWeight: FontWeight.bold,
-                                color: statusColor,
+                      const SizedBox(height: TatoSpacing.sm),
+                      Text(
+                        product.name,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: TatoSpacing.xs),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (product.categoryName != null) ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 9, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: categoryColor.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(
+                                    TatoSizes.radiusPill),
+                              ),
+                              child: Text(
+                                product.categoryName!,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: categoryColor,
+                                ),
                               ),
                             ),
-                            Text(
-                              'unidades en stock',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge
-                                  ?.copyWith(color: statusColor),
-                            ),
-                            const SizedBox(height: TatoSpacing.sm),
-                            StockBadge(status: product.status),
+                            const SizedBox(width: 6),
                           ],
-                        ),
-                      ),
-                      const SizedBox(height: TatoSpacing.lg),
-                      _DetailSection(
-                        title: 'Detalles del producto',
-                        rows: [
-                          _DetailRow(label: 'SKU', value: product.sku ?? '—'),
-                          _DetailRow(
-                              label: 'Categoría',
-                              value: product.categoryName ?? 'Sin categoría'),
-                          _DetailRow(
-                              label: 'Precio de venta',
-                              value: 'RD\$ ${product.price.toStringAsFixed(2)}'),
-                          _DetailRow(
-                              label: 'Costo',
-                              value: 'RD\$ ${product.cost.toStringAsFixed(2)}'),
-                          _DetailRow(
-                              label: 'Alerta de stock mínimo',
-                              value: '${product.minStockAlert.toInt()} uds.'),
-                          _DetailRow(
-                              label: 'Valor en inventario',
-                              value:
-                                  'RD\$ ${product.totalValue.toStringAsFixed(2)}'),
+                          StockBadge(status: product.status),
                         ],
                       ),
-                      const SizedBox(height: TatoSpacing.lg),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: CustomButton(
-                              label: 'Registrar salida',
-                              icon: Icons.remove_circle_outline,
-                              variant: CustomButtonVariant.danger,
-                              onPressed: () async {
-                                await context.push(
-                                    '/new-movement?productId=${product.localId}');
-                                if (mounted) _refresh();
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: TatoSpacing.sm),
-                          Expanded(
-                            child: CustomButton(
-                              label: 'Registrar entrada',
-                              icon: Icons.add_circle_outline,
-                              variant: CustomButtonVariant.secondary,
-                              onPressed: () async {
-                                await context.push(
-                                    '/new-movement?productId=${product.localId}');
-                                if (mounted) _refresh();
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: TatoSpacing.lg),
-                      Text('Historial de movimientos',
-                          style: Theme.of(context).textTheme.titleMedium),
-                      const SizedBox(height: TatoSpacing.sm),
+                      const SizedBox(height: TatoSpacing.md),
                       FutureBuilder<List<InventoryMovement>>(
                         future: _movementsFuture,
                         builder: (context, moveSnapshot) {
-                          if (moveSnapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Padding(
-                              padding: EdgeInsets.symmetric(vertical: TatoSpacing.lg),
-                              child: Center(child: CircularProgressIndicator()),
-                            );
-                          }
                           final movements = moveSnapshot.data ?? [];
-                          if (movements.isEmpty) {
-                            return const EmptyState(
-                              icon: Icons.history_outlined,
-                              title: 'Sin movimientos aún',
-                              subtitle:
-                                  'Las entradas y salidas de este producto aparecerán aquí.',
-                            );
-                          }
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: TatoColors.surface,
-                              borderRadius:
-                                  BorderRadius.circular(TatoSizes.radiusXl),
-                              border: Border.all(color: TatoColors.border),
-                              boxShadow: TatoShadows.level1,
-                            ),
-                            child: Column(
-                              children: movements
-                                  .asMap()
-                                  .entries
-                                  .map((e) => Column(
-                                        children: [
-                                          MovementTile(movement: e.value),
-                                          if (e.key < movements.length - 1)
-                                            const Divider(
-                                                height: 1, indent: 16, endIndent: 16),
-                                        ],
-                                      ))
-                                  .toList(),
-                            ),
+                          final days = _daysToDeplete(product, movements);
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _MetricTile(
+                                      value:
+                                          '${product.currentStock.toInt()}',
+                                      label: 'Stock',
+                                    ),
+                                  ),
+                                  const SizedBox(width: TatoSpacing.xs),
+                                  Expanded(
+                                    child: _MetricTile(
+                                      value:
+                                          '${product.minStockAlert.toInt()}',
+                                      label: 'Mínimo',
+                                    ),
+                                  ),
+                                  const SizedBox(width: TatoSpacing.xs),
+                                  Expanded(
+                                    child: _MetricTile(
+                                      value: days == null
+                                          ? '—'
+                                          : days <= 0
+                                              ? 'Agotado'
+                                              : '~$days días',
+                                      label: 'Se agota',
+                                      background: days != null && days <= 7
+                                          ? TatoColors.coralTint
+                                          : null,
+                                      foreground: days != null && days <= 7
+                                          ? TatoColors.onCoralTint
+                                          : null,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: TatoSpacing.sm),
+                              _PriceCard(product: product, margin: margin),
+                              const SizedBox(height: TatoSpacing.lg),
+                              _DetailSection(
+                                title: 'Detalles del producto',
+                                rows: [
+                                  _DetailRow(
+                                      label: 'SKU', value: product.sku ?? '—'),
+                                  _DetailRow(
+                                      label: 'Categoría',
+                                      value: product.categoryName ??
+                                          'Sin categoría'),
+                                  _DetailRow(
+                                      label: 'Alerta de stock mínimo',
+                                      value:
+                                          '${product.minStockAlert.toInt()} uds.'),
+                                  _DetailRow(
+                                      label: 'Valor en inventario',
+                                      value:
+                                          'RD\$ ${product.totalValue.toStringAsFixed(2)}'),
+                                ],
+                              ),
+                              const SizedBox(height: TatoSpacing.lg),
+                              Text('Historial de movimientos',
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium),
+                              const SizedBox(height: TatoSpacing.sm),
+                              if (moveSnapshot.connectionState ==
+                                  ConnectionState.waiting)
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: TatoSpacing.lg),
+                                  child: Center(
+                                      child: CircularProgressIndicator()),
+                                )
+                              else if (moveSnapshot.hasError)
+                                const ErrorState(
+                                  message:
+                                      'No se pudo cargar el historial de movimientos.',
+                                )
+                              else if (movements.isEmpty)
+                                const EmptyState(
+                                  icon: Icons.history_outlined,
+                                  title: 'Sin movimientos aún',
+                                  subtitle:
+                                      'Las entradas y salidas de este producto aparecerán aquí.',
+                                )
+                              else
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: TatoColors.surface,
+                                    borderRadius: BorderRadius.circular(
+                                        TatoSizes.radiusLg),
+                                    border:
+                                        Border.all(color: TatoColors.border),
+                                  ),
+                                  child: Column(
+                                    children: movements
+                                        .asMap()
+                                        .entries
+                                        .map((e) => Column(
+                                              children: [
+                                                MovementTile(
+                                                    movement: e.value),
+                                                if (e.key <
+                                                    movements.length - 1)
+                                                  const Divider(
+                                                      height: 1,
+                                                      indent: 16,
+                                                      endIndent: 16),
+                                              ],
+                                            ))
+                                        .toList(),
+                                  ),
+                                ),
+                              const SizedBox(height: TatoSpacing.lg),
+                              CustomButton(
+                                label: 'Registrar movimiento',
+                                icon: Icons.swap_vert,
+                                onPressed: () async {
+                                  await context.push(
+                                      '/new-movement?productId=${product.id}');
+                                  if (mounted) _refresh();
+                                },
+                              ),
+                              const SizedBox(height: TatoSpacing.xxl),
+                            ],
                           );
                         },
                       ),
-                      const SizedBox(height: TatoSpacing.xxl),
                     ]),
                   ),
                 ),
@@ -245,6 +301,127 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 }
 
+class _MetricTile extends StatelessWidget {
+  final String value;
+  final String label;
+  final Color? background;
+  final Color? foreground;
+
+  const _MetricTile({
+    required this.value,
+    required this.label,
+    this.background,
+    this.foreground,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = background ?? TatoColors.surface;
+    final fg = foreground ?? TatoColors.onSurface;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: TatoSpacing.xs,
+        vertical: TatoSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(TatoSizes.radiusLg),
+        border: background == null
+            ? Border.all(color: TatoColors.border)
+            : null,
+      ),
+      child: Column(
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(fontSize: 18, color: fg),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: foreground ?? TatoColors.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PriceCard extends StatelessWidget {
+  final Product product;
+  final double? margin;
+
+  const _PriceCard({required this.product, required this.margin});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: TatoSpacing.sm),
+      decoration: BoxDecoration(
+        color: TatoColors.surface,
+        borderRadius: BorderRadius.circular(TatoSizes.radiusLg),
+        border: Border.all(color: TatoColors.border),
+      ),
+      child: Row(
+        children: [
+          _priceColumn(context, 'Costo',
+              'RD\$${product.cost.toStringAsFixed(0)}', TatoColors.onSurface),
+          _separator(),
+          _priceColumn(context, 'Venta',
+              'RD\$${product.price.toStringAsFixed(0)}', TatoColors.onSurface),
+          _separator(),
+          _priceColumn(
+              context,
+              'Margen',
+              margin == null ? '—' : '${margin!.toStringAsFixed(0)}%',
+              const Color(0xFF0F766E)),
+        ],
+      ),
+    );
+  }
+
+  Widget _separator() =>
+      Container(width: 1, height: 28, color: TatoColors.border);
+
+  Widget _priceColumn(
+      BuildContext context, String label, String value, Color color) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11.5,
+              color: TatoColors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 2),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class _DetailSection extends StatelessWidget {
   final String title;
@@ -262,9 +439,8 @@ class _DetailSection extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             color: TatoColors.surface,
-            borderRadius: BorderRadius.circular(TatoSizes.radiusXl),
+            borderRadius: BorderRadius.circular(TatoSizes.radiusLg),
             border: Border.all(color: TatoColors.border),
-            boxShadow: TatoShadows.level1,
           ),
           child: Column(
             children: rows
@@ -294,7 +470,7 @@ class _DetailSection extends StatelessWidget {
                                   .textTheme
                                   .bodyMedium
                                   ?.copyWith(
-                                      color: TatoColors.primary,
+                                      color: TatoColors.onSurface,
                                       fontWeight: FontWeight.w600),
                             ),
                           ],

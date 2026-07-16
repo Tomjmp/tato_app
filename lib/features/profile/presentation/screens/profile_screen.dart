@@ -3,9 +3,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tato_app/core/constants/tato_constants.dart';
 import 'package:tato_app/core/services/providers.dart';
 import 'package:tato_app/features/inventory/domain/entities/product.dart';
+import 'package:tato_app/shared/widgets/error_state.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  late Future<List<Product>> _productsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Loaded once instead of inside build() — this screen watches other
+    // providers (e.g. notificationsEnabledProvider) that change on user
+    // interaction, and re-fetching on every rebuild made the stat tiles
+    // flash back to their loading state each time the switch was toggled.
+    _productsFuture = ref.read(productRepositoryProvider).getProducts();
+  }
 
   Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
@@ -31,6 +49,9 @@ class ProfileScreen extends ConsumerWidget {
     );
 
     if (confirmed == true) {
+      await ref.read(logoutUseCaseProvider)();
+      // Business belongs to the session, not to auth itself — cleared
+      // here in presentation, where cross-feature orchestration belongs.
       ref.read(currentBusinessProvider.notifier).state = null;
       ref.read(currentUserProvider.notifier).state = null;
       // GoRouter's redirect sends the user back to /login automatically.
@@ -44,11 +65,10 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final business = ref.watch(currentBusinessProvider);
     final notificationsEnabled = ref.watch(notificationsEnabledProvider);
-    final productRepo = ref.watch(productRepositoryProvider);
 
     return Scaffold(
       backgroundColor: TatoColors.background,
@@ -58,6 +78,12 @@ class ProfileScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Perfil',
+                    style: Theme.of(context).textTheme.headlineSmall),
+              ),
+              const SizedBox(height: TatoSpacing.md),
               Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -99,7 +125,7 @@ class ProfileScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                business?.name ?? user?.email ?? '',
+                user?.email ?? '',
                 style: Theme.of(context)
                     .textTheme
                     .bodyMedium
@@ -107,8 +133,13 @@ class ProfileScreen extends ConsumerWidget {
               ),
               const SizedBox(height: TatoSpacing.lg),
               FutureBuilder<List<Product>>(
-                future: productRepo.getProducts(),
+                future: _productsFuture,
                 builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const ErrorState(
+                      message: 'No se pudieron cargar tus estadísticas.',
+                    );
+                  }
                   final products = snapshot.data ?? const <Product>[];
                   final atRisk = products.where((p) => p.needsAttention).length;
                   return Row(
@@ -134,6 +165,14 @@ class ProfileScreen extends ConsumerWidget {
                   icon: Icons.storefront_outlined,
                   title: business.name,
                   subtitle: business.category,
+                  trailing: TextButton(
+                    onPressed: () => _comingSoon(context),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(0, 32),
+                    ),
+                    child: const Text('Editar'),
+                  ),
                 ),
               const SizedBox(height: TatoSpacing.sm),
               _ListCard(
@@ -157,6 +196,32 @@ class ProfileScreen extends ConsumerWidget {
                 icon: Icons.cloud_off_outlined,
                 title: 'Modo offline activo',
                 subtitle: 'Conecta con Supabase para sincronizar.',
+              ),
+              const SizedBox(height: TatoSpacing.sm),
+              _ListCard(
+                icon: Icons.workspace_premium_outlined,
+                title: 'Plan Free',
+                subtitle: 'Hasta 30 productos',
+                trailing: GestureDetector(
+                  onTap: () => _comingSoon(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: TatoColors.lilaTint,
+                      borderRadius:
+                          BorderRadius.circular(TatoSizes.radiusPill),
+                    ),
+                    child: const Text(
+                      'Mejorar a Pro',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: TatoColors.onLilaTint,
+                      ),
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(height: TatoSpacing.lg),
               GestureDetector(
@@ -199,7 +264,8 @@ class ProfileScreen extends ConsumerWidget {
                     ?.copyWith(color: TatoColors.onSurfaceVariant),
               ),
               const SizedBox(height: 4),
-              Text('v1.0.0 · MVP', style: Theme.of(context).textTheme.labelMedium),
+              Text('1.0.0 · Hecho en República Dominicana',
+                  style: Theme.of(context).textTheme.labelMedium),
               const SizedBox(height: TatoSpacing.xxl),
             ],
           ),
@@ -235,11 +301,10 @@ class _StatTile extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            label.toUpperCase(),
+            label,
             style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
               color: TatoColors.onSurfaceVariant,
             ),
           ),

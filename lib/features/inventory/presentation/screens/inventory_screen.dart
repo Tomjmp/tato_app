@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tato_app/core/constants/tato_constants.dart';
 import 'package:tato_app/core/services/providers.dart';
+import 'package:tato_app/features/category/domain/entities/category.dart';
 import 'package:tato_app/features/inventory/domain/entities/product.dart';
 import 'package:tato_app/shared/widgets/empty_state.dart';
 import 'package:tato_app/shared/widgets/product_card.dart';
@@ -19,11 +20,13 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   String? _selectedCategory; // null = Todos
   Set<ProductStatus> _statusFilter = {}; // empty = no status filter
   late Future<List<Product>> _productsFuture;
+  List<Category> _categories = [];
 
   @override
   void initState() {
     super.initState();
     _loadProducts();
+    _loadCategories();
   }
 
   // Loaded once and refreshed explicitly (pull-to-refresh, or after
@@ -31,6 +34,13 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   // search field must not re-trigger the mock network delay.
   void _loadProducts() {
     _productsFuture = ref.read(productRepositoryProvider).getProducts();
+  }
+
+  Future<void> _loadCategories() async {
+    final businessId = ref.read(currentBusinessProvider)?.id;
+    if (businessId == null) return;
+    final categories = await ref.read(getCategoriesUseCaseProvider)(businessId);
+    if (mounted) setState(() => _categories = categories);
   }
 
   Future<void> _refresh() async {
@@ -70,7 +80,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       ),
     );
     if (confirmed == true) {
-      await ref.read(productRepositoryProvider).deleteProduct(product.localId);
+      await ref.read(productRepositoryProvider).deleteProduct(product.id);
       if (mounted) _refresh();
     }
   }
@@ -79,14 +89,6 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: TatoColors.background,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: TatoColors.primary,
-        onPressed: () async {
-          await context.push('/inventory/new');
-          if (mounted) _refresh();
-        },
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,24 +100,27 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               ),
               child: Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.menu),
-                    onPressed: () => context.go('/profile'),
-                  ),
                   Expanded(
                     child: Text(
-                      'TÁTO',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleLarge,
+                      'Inventario',
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
                   ),
                   GestureDetector(
-                    onTap: () => context.go('/profile'),
-                    child: const CircleAvatar(
-                      radius: 16,
-                      backgroundColor: TatoColors.primaryContainer,
-                      child: Icon(Icons.person_outline,
-                          size: 18, color: TatoColors.onPrimaryContainer),
+                    onTap: () async {
+                      await context.push('/inventory/new');
+                      if (mounted) _refresh();
+                    },
+                    child: Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: TatoColors.primary,
+                        borderRadius:
+                            BorderRadius.circular(TatoSizes.radiusMd),
+                      ),
+                      child: const Icon(Icons.add,
+                          color: Colors.white, size: 22),
                     ),
                   ),
                 ],
@@ -131,7 +136,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                     child: TextField(
                       onChanged: (v) => setState(() => _search = v.toLowerCase()),
                       decoration: const InputDecoration(
-                        hintText: 'Buscar productos, marcas...',
+                        hintText: 'Buscar producto…',
                         prefixIcon: Icon(Icons.search_outlined),
                       ),
                     ),
@@ -168,7 +173,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 padding: const EdgeInsets.symmetric(
                   horizontal: TatoSpacing.containerPadding,
                 ),
-                itemCount: TatoCategories.businessTypes.length + 1,
+                itemCount: _categories.length + 1,
                 separatorBuilder: (_, __) => const SizedBox(width: 8),
                 itemBuilder: (context, i) {
                   if (i == 0) {
@@ -178,7 +183,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       onTap: () => setState(() => _selectedCategory = null),
                     );
                   }
-                  final category = TatoCategories.businessTypes[i - 1];
+                  final category = _categories[i - 1].name;
                   return _FilterChip(
                     label: category,
                     selected: _selectedCategory == category,
@@ -227,7 +232,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                           horizontal: TatoSpacing.containerPadding,
                         ),
                         child: Text(
-                          'Inventario Actual · ${all.length} Productos',
+                          all.length == 1
+                              ? '1 producto'
+                              : '${all.length} productos',
                           style: Theme.of(context)
                               .textTheme
                               .labelMedium
@@ -274,11 +281,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                     return ProductCard(
                                       product: product,
                                       onTap: () async {
-                                        await context.push('/inventory/${product.localId}');
+                                        await context.push('/inventory/${product.id}');
                                         if (mounted) _refresh();
                                       },
                                       onEdit: () async {
-                                        await context.push('/inventory/${product.localId}/edit');
+                                        await context.push('/inventory/${product.id}/edit');
                                         if (mounted) _refresh();
                                       },
                                       onDelete: () => _deleteProduct(product),
@@ -365,7 +372,7 @@ class _StatusFilterSheetState extends State<_StatusFilterSheet> {
       case ProductStatus.inStock:
         return 'Disponible';
       case ProductStatus.lowStock:
-        return 'Bajo Stock';
+        return 'Bajo stock';
       case ProductStatus.outOfStock:
         return 'Agotado';
     }
@@ -391,10 +398,10 @@ class _FilterChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? TatoColors.primary : TatoColors.surface,
-          borderRadius: BorderRadius.circular(100),
+          color: selected ? TatoColors.onSurface : TatoColors.surface,
+          borderRadius: BorderRadius.circular(TatoSizes.radiusPill),
           border: Border.all(
-            color: selected ? TatoColors.primary : TatoColors.border,
+            color: selected ? TatoColors.onSurface : TatoColors.border,
           ),
         ),
         child: Center(

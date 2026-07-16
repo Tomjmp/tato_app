@@ -13,16 +13,24 @@ import 'package:tato_app/features/insights/presentation/screens/insights_screen.
 import 'package:tato_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:tato_app/shared/widgets/main_navigation_shell.dart';
 import '../services/providers.dart';
+import 'go_router_refresh_notifier.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final user = ref.watch(currentUserProvider);
-  final business = ref.watch(currentBusinessProvider);
+  // Built once and kept alive: redirect reads fresh values via ref.read
+  // each time it runs, and GoRouterRefreshNotifier tells GoRouter when to
+  // re-run it. Rebuilding the whole GoRouter on every auth change (the
+  // previous approach, watching the providers directly here) would reset
+  // the navigation stack on every login/logout — and with real Supabase
+  // Auth, the session stream can emit more than once per sign-in.
+  final refreshNotifier = GoRouterRefreshNotifier(ref);
+  ref.onDispose(refreshNotifier.dispose);
 
   return GoRouter(
     initialLocation: '/splash',
+    refreshListenable: refreshNotifier,
     redirect: (context, state) {
-      final isLoggedIn = user != null;
-      final hasBusiness = business != null;
+      final isLoggedIn = ref.read(currentUserProvider) != null;
+      final hasBusiness = ref.read(currentBusinessProvider) != null;
       final path = state.matchedLocation;
 
       // The splash screen controls its own timing/navigation.

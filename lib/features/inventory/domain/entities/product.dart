@@ -4,8 +4,7 @@ enum ProductStatus { inStock, lowStock, outOfStock }
 
 @immutable
 class Product {
-  final String localId;
-  final String? cloudId;
+  final String id;
   final String businessId;
   final String name;
   final String? description;
@@ -22,8 +21,7 @@ class Product {
   final bool synced;
 
   const Product({
-    required this.localId,
-    this.cloudId,
+    required this.id,
     required this.businessId,
     required this.name,
     this.description,
@@ -52,8 +50,7 @@ class Product {
       status == ProductStatus.outOfStock || status == ProductStatus.lowStock;
 
   Product copyWith({
-    String? localId,
-    String? cloudId,
+    String? id,
     String? businessId,
     String? name,
     String? description,
@@ -70,8 +67,7 @@ class Product {
     bool? synced,
   }) {
     return Product(
-      localId: localId ?? this.localId,
-      cloudId: cloudId ?? this.cloudId,
+      id: id ?? this.id,
       businessId: businessId ?? this.businessId,
       name: name ?? this.name,
       description: description ?? this.description,
@@ -91,8 +87,7 @@ class Product {
 
   Map<String, dynamic> toJson() {
     return {
-      'localId': localId,
-      'cloudId': cloudId,
+      'id': id,
       'businessId': businessId,
       'name': name,
       'description': description,
@@ -112,8 +107,7 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      localId: json['localId'] as String,
-      cloudId: json['cloudId'] as String?,
+      id: json['id'] as String,
       businessId: json['businessId'] as String,
       name: json['name'] as String,
       description: json['description'] as String?,

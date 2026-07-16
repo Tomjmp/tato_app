@@ -3,10 +3,27 @@ import 'package:flutter/material.dart';
 class TatoCategories {
   TatoCategories._();
 
+  /// Tipo de negocio, elegido una vez en el onboarding (`Business.category`).
+  /// Concepto distinto de las categorías de producto — no se toca aquí.
   static const List<String> businessTypes = [
     'Belleza',
     'Alimentos',
     'Bebidas',
+    'Ropa',
+    'Accesorios',
+    'Colmado',
+    'Otro',
+  ];
+
+  /// Categorías de producto sembradas por defecto en cada negocio nuevo
+  /// (ver `SeedDefaultCategoriesUseCase`). El negocio puede editarlas o
+  /// agregar las suyas — esta lista es solo el punto de partida.
+  static const List<String> defaultProductCategories = [
+    'Belleza',
+    'Alimentos',
+    'Bebidas',
+    'Cuidado personal',
+    'Limpieza',
     'Ropa',
     'Accesorios',
     'Colmado',
@@ -21,6 +38,10 @@ class TatoCategories {
         return Icons.restaurant_outlined;
       case 'Bebidas':
         return Icons.local_cafe_outlined;
+      case 'Cuidado personal':
+        return Icons.spa_outlined;
+      case 'Limpieza':
+        return Icons.cleaning_services_outlined;
       case 'Ropa':
         return Icons.checkroom_outlined;
       case 'Accesorios':
@@ -40,6 +61,10 @@ class TatoCategories {
         return const Color(0xFFF59E0B);
       case 'Bebidas':
         return const Color(0xFF3B82F6);
+      case 'Cuidado personal':
+        return const Color(0xFFF472B6);
+      case 'Limpieza':
+        return const Color(0xFF0EA5E9);
       case 'Ropa':
         return const Color(0xFF8B5CF6);
       case 'Accesorios':
@@ -83,6 +108,22 @@ class TatoColors {
   static const Color error = Color(0xFFEF4444); // Soft Coral (Out of stock/error)
   static const Color info = Color(0xFF3B82F6); // Blue
 
+  // Reserved for "smart value": insights hero metrics and the Pro plan.
+  // Never used as decoration (see design/DESIGN_SYSTEM.md).
+  static const Color insight = Color(0xFF8B5CF6);
+
+  // State tint pairs (background + foreground of the same family).
+  // Text on a tinted surface always uses the dark tone of that family,
+  // never plain black or grey.
+  static const Color mintTint = Color(0xFFCCFBF1);
+  static const Color onMintTint = Color(0xFF0F5C4E);
+  static const Color amberTint = Color(0xFFFEF3C7);
+  static const Color onAmberTint = Color(0xFF92400E);
+  static const Color coralTint = Color(0xFFFEE2E2);
+  static const Color onCoralTint = Color(0xFF991B1B);
+  static const Color lilaTint = Color(0xFFEDE9FE);
+  static const Color onLilaTint = Color(0xFF5B21B6);
+
   // Neutrals / Surfaces
   static const Color background = Color(0xFFF8FAFC); // Clean light grey background
   static const Color onBackground = Color(0xFF0F172A);
@@ -118,7 +159,9 @@ class TatoSizes {
   static const double radiusDefault = 8.0;
   static const double radiusMd = 12.0;
   static const double radiusLg = 16.0;
+  static const double radiusHero = 20.0;
   static const double radiusXl = 24.0;
+  static const double radiusPill = 999.0;
 
   static const double minTouchTarget = 48.0;
 }

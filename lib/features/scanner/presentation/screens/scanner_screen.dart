@@ -1,10 +1,9 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tato_app/core/constants/tato_constants.dart';
+import 'package:tato_app/core/services/providers.dart';
 import 'package:tato_app/shared/widgets/custom_button.dart';
-import 'package:tato_app/shared/widgets/tato_app_bar.dart';
 
 enum _ScanState { idle, capturing, analyzing, suggested }
 
@@ -13,34 +12,48 @@ enum _ScanState { idle, capturing, analyzing, suggested }
 /// Confirmación. No camera plugin or ML Kit inference is wired up yet —
 /// this simulates the timing and result so the flow can be designed and
 /// reviewed before the real on-device model is integrated.
-class ScannerScreen extends StatefulWidget {
+class ScannerScreen extends ConsumerStatefulWidget {
   const ScannerScreen({super.key});
 
   @override
-  State<ScannerScreen> createState() => _ScannerScreenState();
+  ConsumerState<ScannerScreen> createState() => _ScannerScreenState();
 }
 
-class _ScannerScreenState extends State<ScannerScreen> {
+class _ScannerScreenState extends ConsumerState<ScannerScreen> {
   _ScanState _state = _ScanState.idle;
   String? _suggestedCategory;
   int _confidence = 0;
   bool _editingCategory = false;
+  List<String> _categoryNames = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    final businessId = ref.read(currentBusinessProvider)?.id;
+    if (businessId == null) return;
+    final categories = await ref.read(getCategoriesUseCaseProvider)(businessId);
+    if (mounted) setState(() => _categoryNames = categories.map((c) => c.name).toList());
+  }
 
   Future<void> _capture() async {
+    final businessId = ref.read(currentBusinessProvider)?.id;
+    if (businessId == null) return;
+
     setState(() => _state = _ScanState.capturing);
     await Future.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
     setState(() => _state = _ScanState.analyzing);
-    await Future.delayed(const Duration(milliseconds: 1400));
+
+    final result = await ref.read(classifyProductUseCaseProvider)(businessId: businessId);
     if (!mounted) return;
 
-    final candidates = TatoCategories.businessTypes
-        .where((c) => c != 'Otro')
-        .toList();
-    final random = Random();
     setState(() {
-      _suggestedCategory = candidates[random.nextInt(candidates.length)];
-      _confidence = 82 + random.nextInt(16); // 82–97%
+      _suggestedCategory = result.category;
+      _confidence = result.confidence;
       _state = _ScanState.suggested;
     });
   }
@@ -66,11 +79,28 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Pantalla oscura: contexto de cámara (ver design/DESIGN_SYSTEM.md, 06).
     return Scaffold(
-      backgroundColor: TatoColors.background,
-      appBar: TatoAppBar(
-        title: 'Escanear producto',
-        showBack: Navigator.canPop(context),
+      backgroundColor: TatoColors.logoInk,
+      appBar: AppBar(
+        backgroundColor: TatoColors.logoInk,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        automaticallyImplyLeading: false,
+        title: Text(
+          'Escanear producto',
+          style: Theme.of(context)
+              .textTheme
+              .titleLarge
+              ?.copyWith(color: Colors.white, fontSize: 18),
+        ),
+        actions: [
+          if (Navigator.canPop(context))
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => context.pop(),
+            ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(TatoSpacing.containerPadding),
@@ -93,7 +123,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
       width: double.infinity,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: TatoColors.primary,
+        color: const Color(0xFF1E293B),
         borderRadius: BorderRadius.circular(TatoSizes.radiusXl),
       ),
       child: Stack(
@@ -101,13 +131,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
         children: [
           if (captured)
             Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF334155), Color(0xFF0F172A)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
+              color: const Color(0xFF334155),
               child: const Center(
                 child: Icon(Icons.image_outlined, color: Colors.white24, size: 96),
               ),
@@ -118,8 +142,8 @@ class _ScannerScreenState extends State<ScannerScreen> {
               painter: _ViewfinderPainter(),
             ),
           if (!captured)
-            const Icon(Icons.center_focus_strong_outlined,
-                color: Colors.white54, size: 64),
+            const Icon(Icons.photo_camera_outlined,
+                color: Color(0xFF475569), size: 56),
           if (_state == _ScanState.capturing)
             Container(
               color: Colors.white.withOpacity(0.85),
@@ -153,9 +177,9 @@ class _ScannerScreenState extends State<ScannerScreen> {
         return Column(
           children: [
             const Text(
-              'Centra el producto dentro del marco y captura la foto.',
+              'Encuadra el producto y captura la foto.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: TatoColors.onSurfaceVariant, fontSize: 13),
+              style: TextStyle(color: Color(0xFFCBD5E1), fontSize: 13),
             ),
             const SizedBox(height: TatoSpacing.md),
             CustomButton(
@@ -218,13 +242,15 @@ class _ScannerScreenState extends State<ScannerScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 2,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
-                              const Text('Categoría sugerida',
+                              const Text('Sugerencia de TÁTO',
                                   style: TextStyle(
                                       fontSize: 12,
                                       color: TatoColors.onSurfaceVariant)),
-                              const SizedBox(width: 6),
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 6, vertical: 1),
@@ -233,7 +259,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                                   borderRadius: BorderRadius.circular(100),
                                 ),
                                 child: Text(
-                                  '$_confidence% confianza',
+                                  '$_confidence%',
                                   style: TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w700,
@@ -262,7 +288,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                 Wrap(
                   spacing: TatoSpacing.xs,
                   runSpacing: TatoSpacing.xs,
-                  children: TatoCategories.businessTypes
+                  children: _categoryNames
                       .where((c) => c != 'Otro')
                       .map((c) {
                     final selected = c == _suggestedCategory;
@@ -299,7 +325,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
               ],
               const SizedBox(height: TatoSpacing.xs),
               const Text(
-                'TÁTO sugiere, tú decides. Puedes editar la categoría antes de confirmar.',
+                'La IA sugiere, tú siempre confirmas.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: TatoColors.onSurfaceVariant, fontSize: 12),
               ),
@@ -317,7 +343,6 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   Expanded(
                     child: CustomButton(
                       label: 'Confirmar',
-                      icon: Icons.check,
                       onPressed: _confirm,
                     ),
                   ),
@@ -334,7 +359,7 @@ class _ViewfinderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.6)
+      ..color = TatoColors.secondary
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;

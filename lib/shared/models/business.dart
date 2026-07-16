@@ -2,8 +2,7 @@ import 'package:flutter/foundation.dart';
 
 @immutable
 class Business {
-  final String localId;
-  final String? cloudId;
+  final String id;
   final String userId;
   final String name;
   final String category;
@@ -13,8 +12,7 @@ class Business {
   final bool synced;
 
   const Business({
-    required this.localId,
-    this.cloudId,
+    required this.id,
     required this.userId,
     required this.name,
     required this.category,
@@ -25,8 +23,7 @@ class Business {
   });
 
   Business copyWith({
-    String? localId,
-    String? cloudId,
+    String? id,
     String? userId,
     String? name,
     String? category,
@@ -36,8 +33,7 @@ class Business {
     bool? synced,
   }) {
     return Business(
-      localId: localId ?? this.localId,
-      cloudId: cloudId ?? this.cloudId,
+      id: id ?? this.id,
       userId: userId ?? this.userId,
       name: name ?? this.name,
       category: category ?? this.category,
@@ -50,8 +46,7 @@ class Business {
 
   Map<String, dynamic> toJson() {
     return {
-      'localId': localId,
-      'cloudId': cloudId,
+      'id': id,
       'userId': userId,
       'name': name,
       'category': category,
@@ -64,8 +59,7 @@ class Business {
 
   factory Business.fromJson(Map<String, dynamic> json) {
     return Business(
-      localId: json['localId'] as String,
-      cloudId: json['cloudId'] as String?,
+      id: json['id'] as String,
       userId: json['userId'] as String,
       name: json['name'] as String,
       category: json['category'] as String,

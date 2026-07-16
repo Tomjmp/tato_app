@@ -14,10 +14,10 @@ class MockProductRepository implements ProductRepository {
   }
 
   @override
-  Future<Product?> getProductById(String localId) async {
+  Future<Product?> getProductById(String id) async {
     await Future.delayed(const Duration(milliseconds: 200));
     try {
-      return _products.firstWhere((p) => p.localId == localId);
+      return _products.firstWhere((p) => p.id == id);
     } catch (_) {
       return null;
     }
@@ -26,7 +26,7 @@ class MockProductRepository implements ProductRepository {
   @override
   Future<void> saveProduct(Product product) async {
     await Future.delayed(const Duration(milliseconds: 300));
-    final index = _products.indexWhere((p) => p.localId == product.localId);
+    final index = _products.indexWhere((p) => p.id == product.id);
     if (index != -1) {
       _products[index] = product;
     } else {
@@ -36,9 +36,9 @@ class MockProductRepository implements ProductRepository {
   }
 
   @override
-  Future<void> deleteProduct(String localId) async {
+  Future<void> deleteProduct(String id) async {
     await Future.delayed(const Duration(milliseconds: 300));
-    _products.removeWhere((p) => p.localId == localId);
+    _products.removeWhere((p) => p.id == id);
     _controller.add(List.unmodifiable(_products));
   }
 
