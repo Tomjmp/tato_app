@@ -31,20 +31,20 @@ class TatoTheme {
         onSurfaceVariant: TatoColors.onSurfaceVariant,
         outline: TatoColors.outline,
       ),
-      // Serif for headlines (matches the brand's editorial-SaaS look),
-      // sans-serif for everything read at body/label size.
-      textTheme: GoogleFonts.plusJakartaSansTextTheme(
+      // Space Grotesk for headlines and numbers (data is the protagonist),
+      // Inter for everything read at body/label size. See design/DESIGN_SYSTEM.md.
+      textTheme: GoogleFonts.interTextTheme(
         const TextTheme(
           titleMedium: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.15,
-            color: TatoColors.primary,
+            color: TatoColors.onSurface,
           ),
           bodyLarge: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.normal,
-            color: TatoColors.primary,
+            color: TatoColors.onSurface,
           ),
           bodyMedium: TextStyle(
             fontSize: 14,
@@ -55,7 +55,7 @@ class TatoTheme {
             fontSize: 14,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.1,
-            color: TatoColors.primary,
+            color: TatoColors.onSurface,
           ),
           labelMedium: TextStyle(
             fontSize: 12,
@@ -65,40 +65,46 @@ class TatoTheme {
           ),
         ),
       ).copyWith(
-        displayLarge: GoogleFonts.playfairDisplay(
+        displayLarge: GoogleFonts.spaceGrotesk(
           fontSize: 40,
-          fontWeight: FontWeight.bold,
-          letterSpacing: -0.8,
-          color: TatoColors.primary,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -1.2,
+          color: TatoColors.onSurface,
         ),
-        headlineLarge: GoogleFonts.playfairDisplay(
+        headlineLarge: GoogleFonts.spaceGrotesk(
           fontSize: 28,
-          fontWeight: FontWeight.bold,
-          letterSpacing: -0.4,
-          color: TatoColors.primary,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.6,
+          color: TatoColors.onSurface,
         ),
-        headlineMedium: GoogleFonts.playfairDisplay(
+        headlineMedium: GoogleFonts.spaceGrotesk(
           fontSize: 24,
-          fontWeight: FontWeight.bold,
-          letterSpacing: -0.2,
-          color: TatoColors.primary,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.4,
+          color: TatoColors.onSurface,
         ),
-        titleLarge: GoogleFonts.playfairDisplay(
+        headlineSmall: GoogleFonts.spaceGrotesk(
+          fontSize: 22,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.3,
+          color: TatoColors.onSurface,
+        ),
+        titleLarge: GoogleFonts.spaceGrotesk(
           fontSize: 20,
           fontWeight: FontWeight.w700,
-          color: TatoColors.primary,
+          color: TatoColors.onSurface,
         ),
       ),
       scaffoldBackgroundColor: TatoColors.background,
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: TatoColors.background,
         elevation: 0,
         centerTitle: false,
-        iconTheme: IconThemeData(color: TatoColors.primary),
-        titleTextStyle: TextStyle(
-          color: TatoColors.primary,
+        iconTheme: const IconThemeData(color: TatoColors.onSurface),
+        titleTextStyle: GoogleFonts.spaceGrotesk(
+          color: TatoColors.onSurface,
           fontSize: 20,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
         ),
       ),
       cardTheme: const CardThemeData(
