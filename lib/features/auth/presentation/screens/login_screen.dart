@@ -4,6 +4,7 @@ import 'package:tato_app/core/constants/tato_constants.dart';
 import 'package:tato_app/core/errors/failures.dart';
 import 'package:tato_app/core/services/providers.dart';
 import 'package:tato_app/shared/widgets/custom_button.dart';
+import 'package:tato_app/shared/widgets/tato_logo.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -72,164 +73,126 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(
             horizontal: TatoSpacing.containerPadding,
-            vertical: TatoSpacing.xl,
+            vertical: TatoSpacing.lg,
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: TatoSpacing.xl),
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: TatoColors.logoInk,
-                  borderRadius: BorderRadius.circular(TatoSizes.radiusMd),
+              const SizedBox(height: TatoSpacing.md),
+              const TatoLogo(size: 52),
+              const SizedBox(height: TatoSpacing.lg),
+              Text(
+                'Hola de nuevo',
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
+              const SizedBox(height: TatoSpacing.unit),
+              Text(
+                'Entra para ver cómo va tu negocio.',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: TatoSpacing.lg),
+              TextField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'Correo',
+                  hintText: 'karla@negocio.do',
+                  prefixIcon: Icon(Icons.mail_outline),
                 ),
-                child: const Center(
-                  child: Text(
-                    'T',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
+              ),
+              const SizedBox(height: TatoSpacing.md),
+              TextField(
+                controller: _passwordController,
+                obscureText: _obscurePassword,
+                decoration: InputDecoration(
+                  labelText: 'Contraseña',
+                  hintText: '••••••••',
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscurePassword
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined),
+                    onPressed: () =>
+                        setState(() => _obscurePassword = !_obscurePassword),
                   ),
                 ),
               ),
-              const SizedBox(height: TatoSpacing.md),
-              Text('TÁTO', style: Theme.of(context).textTheme.headlineMedium),
-              const SizedBox(height: TatoSpacing.lg),
-              Text(
-                'Bienvenido de vuelta',
-                style: Theme.of(context).textTheme.headlineLarge,
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => _comingSoon('La recuperación de contraseña'),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 32),
+                  ),
+                  child: const Text('¿Olvidaste tu contraseña?'),
+                ),
               ),
-              const SizedBox(height: TatoSpacing.xs),
-              Text(
-                'Gestiona tu inventario con total confianza.',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: TatoColors.onSurfaceVariant,
-                    ),
+              if (_error != null) ...[
+                const SizedBox(height: TatoSpacing.xs),
+                Text(
+                  _error!,
+                  style: const TextStyle(color: TatoColors.error, fontSize: 13),
+                ),
+              ],
+              const SizedBox(height: TatoSpacing.sm),
+              CustomButton(
+                label: 'Iniciar sesión',
+                loading: _submitting,
+                onPressed: _submitting ? null : _submit,
+              ),
+              const SizedBox(height: TatoSpacing.md),
+              Row(
+                children: [
+                  const Expanded(child: Divider()),
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: TatoSpacing.xs),
+                    child: Text('o',
+                        style: Theme.of(context).textTheme.labelMedium),
+                  ),
+                  const Expanded(child: Divider()),
+                ],
+              ),
+              const SizedBox(height: TatoSpacing.md),
+              CustomButton(
+                label: 'Crear cuenta gratis',
+                variant: CustomButtonVariant.outline,
+                onPressed: _submitting ? null : _submit,
               ),
               const SizedBox(height: TatoSpacing.xl),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(TatoSpacing.lg),
-                decoration: BoxDecoration(
-                  color: TatoColors.surface,
-                  borderRadius: BorderRadius.circular(TatoSizes.radiusXl),
-                  border: Border.all(color: TatoColors.border),
-                  boxShadow: TatoShadows.level1,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: 'Correo electrónico',
-                        hintText: 'tu@negocio.com',
-                        prefixIcon: Icon(Icons.email_outlined),
-                      ),
-                    ),
-                    const SizedBox(height: TatoSpacing.md),
-                    TextField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        labelText: 'Contraseña',
-                        hintText: '••••••••',
-                        prefixIcon: const Icon(Icons.lock_outlined),
-                        suffixIcon: IconButton(
-                          icon: Icon(_obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined),
-                          onPressed: () =>
-                              setState(() => _obscurePassword = !_obscurePassword),
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () => _comingSoon('La recuperación de contraseña'),
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: const Size(0, 32),
-                        ),
-                        child: const Text('Olvidé mi contraseña'),
-                      ),
-                    ),
-                    if (_error != null) ...[
-                      const SizedBox(height: TatoSpacing.xs),
+              Center(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: TatoColors.mintTint,
+                    borderRadius: BorderRadius.circular(TatoSizes.radiusPill),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.wifi_off_outlined,
+                          size: 13, color: TatoColors.onMintTint),
+                      SizedBox(width: 5),
                       Text(
-                        _error!,
-                        style: const TextStyle(color: TatoColors.error, fontSize: 13),
+                        'Funciona sin internet',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: TatoColors.onMintTint,
+                        ),
                       ),
                     ],
-                    const SizedBox(height: TatoSpacing.sm),
-                    CustomButton(
-                      label: 'Iniciar sesión',
-                      icon: Icons.arrow_forward_rounded,
-                      loading: _submitting,
-                      onPressed: _submitting ? null : _submit,
-                    ),
-                    const SizedBox(height: TatoSpacing.md),
-                    Row(
-                      children: [
-                        const Expanded(child: Divider()),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: TatoSpacing.xs),
-                          child: Text('o accede con',
-                              style: Theme.of(context).textTheme.labelMedium),
-                        ),
-                        const Expanded(child: Divider()),
-                      ],
-                    ),
-                    const SizedBox(height: TatoSpacing.md),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => _comingSoon('El acceso con Google'),
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              side: const BorderSide(color: TatoColors.border),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(TatoSizes.radiusMd),
-                              ),
-                            ),
-                            child: const Text('Google'),
-                          ),
-                        ),
-                        const SizedBox(width: TatoSpacing.sm),
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => _comingSoon('El acceso con Apple'),
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              side: const BorderSide(color: TatoColors.border),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(TatoSizes.radiusMd),
-                              ),
-                            ),
-                            child: const Text('Apple'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
               ),
-              const SizedBox(height: TatoSpacing.md),
-              TextButton(
-                onPressed: _submitting ? null : _submit,
-                child: const Text('¿No tienes cuenta? Regístrate'),
-              ),
               const SizedBox(height: TatoSpacing.sm),
-              Text(
-                '© 2026 TÁTO · Tu inventario, sin complicarte.',
-                style: Theme.of(context).textTheme.labelMedium,
+              Center(
+                child: Text(
+                  '© 2026 TÁTO · Tu inventario, sin complicarte.',
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
               ),
             ],
           ),
