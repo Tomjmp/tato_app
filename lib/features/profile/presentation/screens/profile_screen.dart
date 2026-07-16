@@ -78,6 +78,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Perfil',
+                    style: Theme.of(context).textTheme.headlineSmall),
+              ),
+              const SizedBox(height: TatoSpacing.md),
               Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -119,7 +125,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               const SizedBox(height: 2),
               Text(
-                business?.name ?? user?.email ?? '',
+                user?.email ?? '',
                 style: Theme.of(context)
                     .textTheme
                     .bodyMedium
@@ -159,6 +165,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   icon: Icons.storefront_outlined,
                   title: business.name,
                   subtitle: business.category,
+                  trailing: TextButton(
+                    onPressed: () => _comingSoon(context),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(0, 32),
+                    ),
+                    child: const Text('Editar'),
+                  ),
                 ),
               const SizedBox(height: TatoSpacing.sm),
               _ListCard(
@@ -182,6 +196,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 icon: Icons.cloud_off_outlined,
                 title: 'Modo offline activo',
                 subtitle: 'Conecta con Supabase para sincronizar.',
+              ),
+              const SizedBox(height: TatoSpacing.sm),
+              _ListCard(
+                icon: Icons.workspace_premium_outlined,
+                title: 'Plan Free',
+                subtitle: 'Hasta 30 productos',
+                trailing: GestureDetector(
+                  onTap: () => _comingSoon(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: TatoColors.lilaTint,
+                      borderRadius:
+                          BorderRadius.circular(TatoSizes.radiusPill),
+                    ),
+                    child: const Text(
+                      'Mejorar a Pro',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: TatoColors.onLilaTint,
+                      ),
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(height: TatoSpacing.lg),
               GestureDetector(
@@ -224,7 +264,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ?.copyWith(color: TatoColors.onSurfaceVariant),
               ),
               const SizedBox(height: 4),
-              Text('v1.0.0 · MVP', style: Theme.of(context).textTheme.labelMedium),
+              Text('1.0.0 · Hecho en República Dominicana',
+                  style: Theme.of(context).textTheme.labelMedium),
               const SizedBox(height: TatoSpacing.xxl),
             ],
           ),
@@ -260,11 +301,10 @@ class _StatTile extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            label.toUpperCase(),
+            label,
             style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
               color: TatoColors.onSurfaceVariant,
             ),
           ),

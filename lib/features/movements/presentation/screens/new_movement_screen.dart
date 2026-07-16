@@ -157,7 +157,7 @@ class _NewMovementScreenState extends ConsumerState<NewMovementScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
           onPressed: () => context.pop(),
         ),
-        title: Text('TÁTO', style: Theme.of(context).textTheme.titleLarge),
+        title: const Text('Nuevo movimiento'),
         centerTitle: true,
         actions: [
           IconButton(
@@ -171,16 +171,6 @@ class _NewMovementScreenState extends ConsumerState<NewMovementScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Registrar Movimiento', style: Theme.of(context).textTheme.headlineLarge),
-            const SizedBox(height: 4),
-            Text(
-              'Gestiona el flujo de inventario con precisión.',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: TatoColors.onSurfaceVariant),
-            ),
-            const SizedBox(height: TatoSpacing.lg),
             SegmentedControl<MovementType>(
               selected: _type,
               onChanged: (type) => _setType(
@@ -222,11 +212,7 @@ class _NewMovementScreenState extends ConsumerState<NewMovementScreen> {
               ),
             ],
             const SizedBox(height: TatoSpacing.lg),
-            Text('PRODUCTO',
-                style: Theme.of(context)
-                    .textTheme
-                    .labelMedium
-                    ?.copyWith(letterSpacing: 0.5)),
+            Text('Producto', style: Theme.of(context).textTheme.labelMedium),
             const SizedBox(height: TatoSpacing.sm),
             if (_selectedProduct == null) ...[
               TextField(
@@ -271,18 +257,21 @@ class _NewMovementScreenState extends ConsumerState<NewMovementScreen> {
                 onClear: () => setState(() => _selectedProduct = null),
               ),
             const SizedBox(height: TatoSpacing.md),
-            Text('CANTIDAD',
-                style: Theme.of(context)
-                    .textTheme
-                    .labelMedium
-                    ?.copyWith(letterSpacing: 0.5)),
+            Text('Cantidad', style: Theme.of(context).textTheme.labelMedium),
             const SizedBox(height: TatoSpacing.sm),
             QuantityStepper(
               value: _quantity,
               onChanged: (v) => setState(() => _quantity = v),
             ),
+            if (_selectedProduct != null) ...[
+              const SizedBox(height: TatoSpacing.xs),
+              Center(child: _RemainingHint(product: _selectedProduct!,
+                  type: _type,
+                  increasesStock: _increasesStock,
+                  quantity: _quantity)),
+            ],
             const SizedBox(height: TatoSpacing.md),
-            Text('Razón', style: Theme.of(context).textTheme.titleMedium),
+            Text('Motivo', style: Theme.of(context).textTheme.labelMedium),
             const SizedBox(height: TatoSpacing.sm),
             Wrap(
               spacing: TatoSpacing.xs,
@@ -295,11 +284,8 @@ class _NewMovementScreenState extends ConsumerState<NewMovementScreen> {
                   .toList(),
             ),
             const SizedBox(height: TatoSpacing.md),
-            Text('NOTA (OPCIONAL)',
-                style: Theme.of(context)
-                    .textTheme
-                    .labelMedium
-                    ?.copyWith(letterSpacing: 0.5)),
+            Text('Nota (opcional)',
+                style: Theme.of(context).textTheme.labelMedium),
             const SizedBox(height: TatoSpacing.sm),
             TextField(
               controller: _noteController,
@@ -317,7 +303,11 @@ class _NewMovementScreenState extends ConsumerState<NewMovementScreen> {
             ],
             const SizedBox(height: TatoSpacing.xl),
             CustomButton(
-              label: 'Guardar movimiento',
+              label: _type == MovementType.exit
+                  ? 'Guardar salida'
+                  : _type == MovementType.entry
+                      ? 'Guardar entrada'
+                      : 'Guardar ajuste',
               icon: Icons.save_outlined,
               loading: _saving,
               onPressed: _saving ? null : _save,
@@ -482,15 +472,73 @@ class _ReasonChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Chip(
-        label: Text(label),
-        backgroundColor:
-            selected ? TatoColors.primaryContainer : TatoColors.surfaceVariant,
-        labelStyle: TextStyle(
-          color: selected ? TatoColors.onPrimaryContainer : TatoColors.onSurfaceVariant,
-          fontWeight: selected ? FontWeight.w700 : FontWeight.normal,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        margin: const EdgeInsets.only(bottom: TatoSpacing.xs),
+        decoration: BoxDecoration(
+          color: selected ? TatoColors.onSurface : TatoColors.surface,
+          borderRadius: BorderRadius.circular(TatoSizes.radiusPill),
+          border: Border.all(
+            color: selected ? TatoColors.onSurface : TatoColors.border,
+            width: 1.5,
+          ),
         ),
-        side: BorderSide.none,
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? Colors.white : TatoColors.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
+            fontSize: 12,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Validación en vivo: anticipa el stock resultante antes de guardar y
+/// avisa en coral cuando una salida dejaría el stock en negativo (la regla
+/// dura vive en RegisterMovementUseCase; esto solo la hace visible antes).
+class _RemainingHint extends StatelessWidget {
+  final Product product;
+  final MovementType type;
+  final bool increasesStock;
+  final int quantity;
+
+  const _RemainingHint({
+    required this.product,
+    required this.type,
+    required this.increasesStock,
+    required this.quantity,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final adds = type == MovementType.entry ||
+        (type == MovementType.adjustment && increasesStock);
+    final remaining =
+        product.currentStock + (adds ? quantity : -quantity).toDouble();
+    final invalid = remaining < 0;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: invalid ? TatoColors.coralTint : TatoColors.primaryContainer,
+        borderRadius: BorderRadius.circular(TatoSizes.radiusPill),
+      ),
+      child: Text(
+        invalid
+            ? 'Stock insuficiente: solo hay ${product.currentStock.toInt()}'
+            : remaining == 1
+                ? 'Quedará 1 unidad'
+                : 'Quedarán ${remaining.toInt()} unidades',
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: invalid
+              ? TatoColors.onCoralTint
+              : TatoColors.onPrimaryContainer,
+        ),
       ),
     );
   }

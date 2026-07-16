@@ -67,19 +67,31 @@ class _SetupBusinessScreenState extends ConsumerState<SetupBusinessScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                'Paso 2 de 2',
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+              const SizedBox(height: TatoSpacing.xs),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(TatoSizes.radiusPill),
+                child: const LinearProgressIndicator(
+                  value: 1,
+                  minHeight: 5,
+                  backgroundColor: TatoColors.border,
+                  color: TatoColors.primary,
+                ),
+              ),
               const SizedBox(height: TatoSpacing.lg),
               Text(
-                'Configura tu negocio',
-                style: Theme.of(context).textTheme.headlineLarge,
+                'Crea tu negocio',
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(height: TatoSpacing.xs),
               Text(
-                'TÁTO necesita conocer tu negocio para darte mejores insights.',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: TatoColors.onSurfaceVariant,
-                    ),
+                'Así TÁTO personaliza tus categorías y alertas.',
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
-              const SizedBox(height: TatoSpacing.xxl),
+              const SizedBox(height: TatoSpacing.xl),
               TextField(
                 controller: _nameController,
                 decoration: const InputDecoration(
@@ -96,7 +108,6 @@ class _SetupBusinessScreenState extends ConsumerState<SetupBusinessScreen> {
                 runSpacing: TatoSpacing.xs,
                 children: TatoCategories.businessTypes.map((type) {
                   final selected = _selectedType == type;
-                  final color = TatoCategories.colorFor(type);
                   return GestureDetector(
                     onTap: () => setState(() => _selectedType = type),
                     child: AnimatedContainer(
@@ -104,24 +115,31 @@ class _SetupBusinessScreenState extends ConsumerState<SetupBusinessScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 10),
                       decoration: BoxDecoration(
-                        color: selected ? color.withOpacity(0.12) : TatoColors.surface,
-                        borderRadius: BorderRadius.circular(TatoSizes.radiusMd),
+                        color: selected ? TatoColors.primary : TatoColors.surface,
+                        borderRadius:
+                            BorderRadius.circular(TatoSizes.radiusPill),
                         border: Border.all(
-                          color: selected ? color : TatoColors.border,
-                          width: selected ? 1.5 : 1,
+                          color:
+                              selected ? TatoColors.primary : TatoColors.border,
+                          width: 1.5,
                         ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(TatoCategories.iconFor(type),
-                              size: 16, color: selected ? color : TatoColors.onSurfaceVariant),
+                              size: 16,
+                              color: selected
+                                  ? Colors.white
+                                  : TatoColors.onSurfaceVariant),
                           const SizedBox(width: 6),
                           Text(
                             type,
                             style: TextStyle(
-                              color: selected ? color : TatoColors.onSurfaceVariant,
-                              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                              color: selected
+                                  ? Colors.white
+                                  : TatoColors.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
                               fontSize: 13,
                             ),
                           ),
@@ -140,9 +158,16 @@ class _SetupBusinessScreenState extends ConsumerState<SetupBusinessScreen> {
               ],
               const SizedBox(height: TatoSpacing.xxl),
               CustomButton(
-                label: 'Comenzar',
+                label: 'Crear mi negocio',
                 loading: _submitting,
                 onPressed: _submitting ? null : _submit,
+              ),
+              const SizedBox(height: TatoSpacing.sm),
+              Center(
+                child: Text(
+                  'Podrás editarlo cuando quieras.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ),
             ],
           ),

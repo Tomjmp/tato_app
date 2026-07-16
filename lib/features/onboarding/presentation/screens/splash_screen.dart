@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tato_app/core/constants/tato_constants.dart';
-import 'package:tato_app/shared/widgets/custom_button.dart';
+import 'package:tato_app/shared/widgets/tato_logo.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -9,55 +9,32 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TatoColors.background,
+      backgroundColor: TatoColors.primary,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: TatoSpacing.xl,
-            vertical: TatoSpacing.xl,
+            vertical: TatoSpacing.lg,
           ),
           child: Column(
             children: [
               const Spacer(flex: 3),
-              Container(
-                width: 84,
-                height: 84,
-                decoration: BoxDecoration(
-                  color: TatoColors.logoInk,
-                  borderRadius: BorderRadius.circular(TatoSizes.radiusLg),
-                ),
-                child: const Center(
-                  child: Text(
-                    'T',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 42,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
+              const TatoLogo.onDark(size: 100),
               const SizedBox(height: TatoSpacing.lg),
               Text(
                 'TÁTO',
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      letterSpacing: 4,
+                      color: Colors.white,
+                      fontSize: 42,
+                      letterSpacing: -1,
                     ),
               ),
-              const SizedBox(height: TatoSpacing.sm),
+              const SizedBox(height: TatoSpacing.xs),
               Text(
                 'Tu inventario, sin complicarte.',
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontSize: 20,
-                    ),
-              ),
-              const SizedBox(height: TatoSpacing.md),
-              Text(
-                'Controla productos, registra movimientos\ny recibe alertas inteligentes.',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      height: 1.5,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Colors.white.withOpacity(0.78),
                     ),
               ),
               const SizedBox(height: TatoSpacing.lg),
@@ -66,32 +43,77 @@ class SplashScreen extends StatelessWidget {
                 spacing: TatoSpacing.xs,
                 runSpacing: TatoSpacing.xs,
                 children: [
-                  _FeaturePill(icon: Icons.check_circle_outline, label: 'Simplicidad Total'),
-                  _FeaturePill(icon: Icons.notifications_outlined, label: 'Alertas'),
-                  _FeaturePill(icon: Icons.show_chart_outlined, label: 'Data'),
+                  _FeaturePill(icon: Icons.wifi_off_outlined, label: 'Offline'),
+                  _FeaturePill(
+                      icon: Icons.auto_awesome_outlined, label: 'IA on-device'),
+                  _FeaturePill(
+                      icon: Icons.notifications_outlined, label: 'Alertas'),
                 ],
               ),
               const Spacer(flex: 4),
-              CustomButton(
-                label: 'Crear cuenta',
-                onPressed: () => context.go('/login'),
-                icon: Icons.arrow_forward_rounded,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 18,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius:
+                          BorderRadius.circular(TatoSizes.radiusPill),
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  _Dot(color: Colors.white.withOpacity(0.4)),
+                  const SizedBox(width: 5),
+                  _Dot(color: Colors.white.withOpacity(0.4)),
+                ],
               ),
-              const SizedBox(height: TatoSpacing.sm),
-              CustomButton(
-                label: 'Iniciar sesión',
-                onPressed: () => context.go('/login'),
-                variant: CustomButtonVariant.outline,
+              const SizedBox(height: TatoSpacing.md),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: FilledButton(
+                  onPressed: () => context.go('/login'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: TatoColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(TatoSizes.radiusLg),
+                    ),
+                  ),
+                  child: const Text(
+                    'Empezar',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                ),
               ),
-              const SizedBox(height: TatoSpacing.lg),
+              const SizedBox(height: TatoSpacing.md),
               Text(
                 'Ayuda   ·   Términos   ·   Español',
-                style: Theme.of(context).textTheme.labelMedium,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: Colors.white.withOpacity(0.6),
+                    ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _Dot extends StatelessWidget {
+  final Color color;
+
+  const _Dot({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 6,
+      height: 6,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 }
@@ -107,21 +129,20 @@ class _FeaturePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: TatoColors.surface,
-        borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: TatoColors.border),
+        color: Colors.white.withOpacity(0.14),
+        borderRadius: BorderRadius.circular(TatoSizes.radiusPill),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: TatoColors.primary),
+          Icon(icon, size: 14, color: Colors.white),
           const SizedBox(width: 6),
           Text(
             label,
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: TatoColors.primary,
+              color: Colors.white,
             ),
           ),
         ],

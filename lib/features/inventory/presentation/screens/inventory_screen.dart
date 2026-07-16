@@ -89,14 +89,6 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: TatoColors.background,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: TatoColors.primary,
-        onPressed: () async {
-          await context.push('/inventory/new');
-          if (mounted) _refresh();
-        },
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,24 +100,27 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               ),
               child: Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.menu),
-                    onPressed: () => context.go('/profile'),
-                  ),
                   Expanded(
                     child: Text(
-                      'TÁTO',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleLarge,
+                      'Inventario',
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
                   ),
                   GestureDetector(
-                    onTap: () => context.go('/profile'),
-                    child: const CircleAvatar(
-                      radius: 16,
-                      backgroundColor: TatoColors.primaryContainer,
-                      child: Icon(Icons.person_outline,
-                          size: 18, color: TatoColors.onPrimaryContainer),
+                    onTap: () async {
+                      await context.push('/inventory/new');
+                      if (mounted) _refresh();
+                    },
+                    child: Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: TatoColors.primary,
+                        borderRadius:
+                            BorderRadius.circular(TatoSizes.radiusMd),
+                      ),
+                      child: const Icon(Icons.add,
+                          color: Colors.white, size: 22),
                     ),
                   ),
                 ],
@@ -141,7 +136,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                     child: TextField(
                       onChanged: (v) => setState(() => _search = v.toLowerCase()),
                       decoration: const InputDecoration(
-                        hintText: 'Buscar productos, marcas...',
+                        hintText: 'Buscar producto…',
                         prefixIcon: Icon(Icons.search_outlined),
                       ),
                     ),
@@ -237,7 +232,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                           horizontal: TatoSpacing.containerPadding,
                         ),
                         child: Text(
-                          'Inventario Actual · ${all.length} Productos',
+                          all.length == 1
+                              ? '1 producto'
+                              : '${all.length} productos',
                           style: Theme.of(context)
                               .textTheme
                               .labelMedium
@@ -375,7 +372,7 @@ class _StatusFilterSheetState extends State<_StatusFilterSheet> {
       case ProductStatus.inStock:
         return 'Disponible';
       case ProductStatus.lowStock:
-        return 'Bajo Stock';
+        return 'Bajo stock';
       case ProductStatus.outOfStock:
         return 'Agotado';
     }
@@ -401,10 +398,10 @@ class _FilterChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? TatoColors.primary : TatoColors.surface,
-          borderRadius: BorderRadius.circular(100),
+          color: selected ? TatoColors.onSurface : TatoColors.surface,
+          borderRadius: BorderRadius.circular(TatoSizes.radiusPill),
           border: Border.all(
-            color: selected ? TatoColors.primary : TatoColors.border,
+            color: selected ? TatoColors.onSurface : TatoColors.border,
           ),
         ),
         child: Center(
