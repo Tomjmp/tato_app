@@ -38,46 +38,90 @@ class MainNavigationShell extends StatelessWidget {
     return Scaffold(
       body: child,
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          border: const Border(
+        decoration: const BoxDecoration(
+          color: TatoColors.surface,
+          border: Border(
             top: BorderSide(color: TatoColors.border, width: 1),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, -2),
-            ),
-          ],
         ),
-        child: NavigationBar(
-          selectedIndex: selectedIndex,
-          onDestinationSelected: (i) => _onNavTap(context, i),
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home),
-              label: 'Hoy',
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 64,
+            child: Row(
+              children: [
+                _NavItem(
+                  icon: Icons.home_outlined,
+                  selectedIcon: Icons.home,
+                  label: 'Hoy',
+                  selected: selectedIndex == 0,
+                  onTap: () => _onNavTap(context, 0),
+                ),
+                _NavItem(
+                  icon: Icons.inventory_2_outlined,
+                  selectedIcon: Icons.inventory_2,
+                  label: 'Inventario',
+                  selected: selectedIndex == 1,
+                  onTap: () => _onNavTap(context, 1),
+                ),
+                _ScanButton(onTap: () => _onNavTap(context, 2)),
+                _NavItem(
+                  icon: Icons.insights_outlined,
+                  selectedIcon: Icons.insights,
+                  label: 'Insights',
+                  selected: selectedIndex == 3,
+                  onTap: () => _onNavTap(context, 3),
+                ),
+                _NavItem(
+                  icon: Icons.person_outline,
+                  selectedIcon: Icons.person,
+                  label: 'Perfil',
+                  selected: selectedIndex == 4,
+                  onTap: () => _onNavTap(context, 4),
+                ),
+              ],
             ),
-            NavigationDestination(
-              icon: Icon(Icons.inventory_2_outlined),
-              selectedIcon: Icon(Icons.inventory_2),
-              label: 'Stock',
-            ),
-            NavigationDestination(
-              icon: _ScanIcon(),
-              selectedIcon: _ScanIcon(),
-              label: 'Scan',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.insights_outlined),
-              selectedIcon: Icon(Icons.insights),
-              label: 'Data',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.person_outlined),
-              selectedIcon: Icon(Icons.person),
-              label: 'Perfil',
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavItem extends StatelessWidget {
+  final IconData icon;
+  final IconData selectedIcon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _NavItem({
+    required this.icon,
+    required this.selectedIcon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color =
+        selected ? TatoColors.primary : TatoColors.onSurfaceVariant;
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(selected ? selectedIcon : icon, size: 22, color: color),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
             ),
           ],
         ),
@@ -86,22 +130,36 @@ class MainNavigationShell extends StatelessWidget {
   }
 }
 
-/// Scan always renders as a filled blue pill, even unselected — the
-/// mockups treat it as a permanent shortcut rather than a plain tab.
-class _ScanIcon extends StatelessWidget {
-  const _ScanIcon();
+/// Escanear es la feature diferenciadora: tile azul elevado sobre la barra,
+/// en el lugar del pulgar, siempre visible aunque no sea la tab activa.
+class _ScanButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _ScanButton({required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 34,
-      height: 34,
-      decoration: BoxDecoration(
-        color: TatoColors.primary,
-        borderRadius: BorderRadius.circular(TatoSizes.radiusMd),
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Center(
+          child: Transform.translate(
+            offset: const Offset(0, -16),
+            child: Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: TatoColors.primary,
+                borderRadius: BorderRadius.circular(TatoSizes.radiusLg),
+                border: Border.all(color: TatoColors.background, width: 4),
+              ),
+              child: const Icon(Icons.qr_code_scanner_outlined,
+                  color: Colors.white, size: 24),
+            ),
+          ),
+        ),
       ),
-      child: const Icon(Icons.center_focus_strong_outlined,
-          color: Colors.white, size: 18),
     );
   }
 }
