@@ -77,7 +77,7 @@ class CustomButton extends StatelessWidget {
         ? OutlinedButton(
             onPressed: isDisabled ? null : onPressed,
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: TatoColors.border, width: 1.5),
+              side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant, width: 1.5),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(TatoSizes.radiusMd),
               ),

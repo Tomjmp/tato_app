@@ -1,0 +1,17 @@
+# Splash nativo de TÁTO: monograma blanco sobre el azul de marca.
+# Regenerar con: dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#1D4ED8"
+  image: assets/splash/mark.png
+  color_dark: "#0F172A"
+  image_dark: assets/splash/mark.png
+
+  android_12:
+    color: "#1D4ED8"
+    image: assets/splash/mark.png
+    color_dark: "#0F172A"
+    image_dark: assets/splash/mark.png
+
+  android: true
+  ios: true
+  web: false

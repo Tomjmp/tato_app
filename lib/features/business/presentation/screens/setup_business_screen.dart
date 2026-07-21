@@ -57,7 +57,6 @@ class _SetupBusinessScreenState extends ConsumerState<SetupBusinessScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TatoColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(
@@ -74,10 +73,10 @@ class _SetupBusinessScreenState extends ConsumerState<SetupBusinessScreen> {
               const SizedBox(height: TatoSpacing.xs),
               ClipRRect(
                 borderRadius: BorderRadius.circular(TatoSizes.radiusPill),
-                child: const LinearProgressIndicator(
+                child: LinearProgressIndicator(
                   value: 1,
                   minHeight: 5,
-                  backgroundColor: TatoColors.border,
+                  backgroundColor: Theme.of(context).colorScheme.outlineVariant,
                   color: TatoColors.primary,
                 ),
               ),
@@ -115,12 +114,12 @@ class _SetupBusinessScreenState extends ConsumerState<SetupBusinessScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 10),
                       decoration: BoxDecoration(
-                        color: selected ? TatoColors.primary : TatoColors.surface,
+                        color: selected ? TatoColors.primary : Theme.of(context).colorScheme.surface,
                         borderRadius:
                             BorderRadius.circular(TatoSizes.radiusPill),
                         border: Border.all(
                           color:
-                              selected ? TatoColors.primary : TatoColors.border,
+                              selected ? TatoColors.primary : Theme.of(context).colorScheme.outlineVariant,
                           width: 1.5,
                         ),
                       ),

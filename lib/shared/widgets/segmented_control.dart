@@ -31,7 +31,7 @@ class SegmentedControl<T> extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: TatoColors.surfaceVariant,
+        color: Theme.of(context).colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(TatoSizes.radiusMd),
       ),
       child: Row(
@@ -44,7 +44,7 @@ class SegmentedControl<T> extends StatelessWidget {
                 duration: const Duration(milliseconds: 150),
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: isSelected ? TatoColors.surface : Colors.transparent,
+                  color: isSelected ? Theme.of(context).colorScheme.surface : Colors.transparent,
                   borderRadius: BorderRadius.circular(TatoSizes.radiusMd - 2),
                   boxShadow: isSelected ? TatoShadows.level1 : null,
                 ),

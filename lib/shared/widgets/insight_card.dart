@@ -29,9 +29,9 @@ class InsightCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(TatoSpacing.md),
         decoration: BoxDecoration(
-          color: TatoColors.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(TatoSizes.radiusXl),
-          border: Border.all(color: TatoColors.border),
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           boxShadow: TatoShadows.level1,
         ),
         child: Row(

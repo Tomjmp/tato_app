@@ -23,9 +23,9 @@ class QuantityStepper extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: TatoSpacing.md),
       decoration: BoxDecoration(
-        color: TatoColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(TatoSizes.radiusXl),
-        border: Border.all(color: TatoColors.border),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -73,7 +73,7 @@ class _StepButton extends StatelessWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: enabled ? TatoColors.surfaceVariant : TatoColors.surfaceVariant.withOpacity(0.5),
+          color: enabled ? Theme.of(context).colorScheme.surfaceVariant : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: enabled ? TatoColors.primary : TatoColors.outline),

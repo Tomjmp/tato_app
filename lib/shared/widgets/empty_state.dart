@@ -30,7 +30,7 @@ class EmptyState extends StatelessWidget {
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: TatoColors.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(TatoSizes.radiusXl),
               ),
               child: Icon(icon, size: 32, color: TatoColors.onSurfaceVariant),

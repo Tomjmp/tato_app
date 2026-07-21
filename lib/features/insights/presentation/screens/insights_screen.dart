@@ -40,7 +40,6 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
     final calculateInsights = ref.watch(calculateInsightsUseCaseProvider);
 
     return Scaffold(
-      backgroundColor: TatoColors.background,
       body: SafeArea(
         child: FutureBuilder<List<Object>>(
           future: _dataFuture,
@@ -119,7 +118,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(TatoSpacing.md),
                             decoration: BoxDecoration(
-                              color: TatoColors.surfaceVariant,
+                              color: Theme.of(context).colorScheme.surfaceVariant,
                               borderRadius: BorderRadius.circular(TatoSizes.radiusMd),
                             ),
                             child: const Text(
@@ -310,9 +309,9 @@ class _WeeklySalesCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(TatoSpacing.md),
       decoration: BoxDecoration(
-        color: TatoColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(TatoSizes.radiusXl),
-        border: Border.all(color: TatoColors.border),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         boxShadow: TatoShadows.level1,
       ),
       child: Column(
@@ -398,9 +397,9 @@ class _OpportunityCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(TatoSpacing.md),
         decoration: BoxDecoration(
-          color: TatoColors.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(TatoSizes.radiusXl),
-          border: Border.all(color: TatoColors.border),
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           boxShadow: TatoShadows.level1,
         ),
         child: Row(
@@ -479,7 +478,7 @@ class _Section extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(TatoSpacing.md),
             decoration: BoxDecoration(
-              color: TatoColors.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(TatoSizes.radiusMd),
             ),
             child: Text(
@@ -517,9 +516,9 @@ class _VelocityTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(TatoSpacing.md),
         decoration: BoxDecoration(
-          color: TatoColors.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(TatoSizes.radiusXl),
-          border: Border.all(color: TatoColors.border),
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           boxShadow: TatoShadows.level1,
         ),
         child: Row(

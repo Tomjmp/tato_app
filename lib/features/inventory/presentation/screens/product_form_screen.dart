@@ -183,7 +183,6 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TatoColors.background,
       appBar: TatoAppBar(title: _isEditing ? 'Editar producto' : 'Nuevo producto'),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -252,10 +251,10 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                           padding:
                               const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
-                            color: selected ? color.withOpacity(0.12) : TatoColors.surface,
+                            color: selected ? color.withOpacity(0.12) : Theme.of(context).colorScheme.surface,
                             borderRadius: BorderRadius.circular(TatoSizes.radiusMd),
                             border: Border.all(
-                              color: selected ? color : TatoColors.border,
+                              color: selected ? color : Theme.of(context).colorScheme.outlineVariant,
                               width: selected ? 1.5 : 1,
                             ),
                           ),

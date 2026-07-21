@@ -51,7 +51,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   Future<void> _openStatusFilter() async {
     final result = await showModalBottomSheet<Set<ProductStatus>>(
       context: context,
-      backgroundColor: TatoColors.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(TatoSizes.radiusXl)),
       ),
@@ -81,14 +81,29 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     );
     if (confirmed == true) {
       await ref.read(productRepositoryProvider).deleteProduct(product.id);
-      if (mounted) _refresh();
+      if (!mounted) return;
+      _refresh();
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          SnackBar(
+            content: Text('"${product.name}" eliminado'),
+            action: SnackBarAction(
+              label: 'Deshacer',
+              onPressed: () async {
+                // El repositorio re-crea el producto con el mismo id.
+                await ref.read(productRepositoryProvider).saveProduct(product);
+                if (mounted) _refresh();
+              },
+            ),
+          ),
+        );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TatoColors.background,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,21 +121,26 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () async {
-                      await context.push('/inventory/new');
-                      if (mounted) _refresh();
-                    },
-                    child: Container(
-                      width: 42,
-                      height: 42,
-                      decoration: BoxDecoration(
-                        color: TatoColors.primary,
-                        borderRadius:
-                            BorderRadius.circular(TatoSizes.radiusMd),
+                  Semantics(
+                    button: true,
+                    label: 'Agregar producto',
+                    child: InkWell(
+                      onTap: () async {
+                        await context.push('/inventory/new');
+                        if (mounted) _refresh();
+                      },
+                      borderRadius: BorderRadius.circular(TatoSizes.radiusMd),
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: TatoColors.primary,
+                          borderRadius:
+                              BorderRadius.circular(TatoSizes.radiusMd),
+                        ),
+                        child: const Icon(Icons.add,
+                            color: Colors.white, size: 24),
                       ),
-                      child: const Icon(Icons.add,
-                          color: Colors.white, size: 22),
                     ),
                   ),
                 ],
@@ -149,11 +169,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       height: 48,
                       decoration: BoxDecoration(
                         color: _statusFilter.isEmpty
-                            ? TatoColors.surface
+                            ? Theme.of(context).colorScheme.surface
                             : TatoColors.primary,
                         borderRadius: BorderRadius.circular(TatoSizes.radiusMd),
                         border: Border.all(
-                          color: _statusFilter.isEmpty ? TatoColors.border : TatoColors.primary,
+                          color: _statusFilter.isEmpty ? Theme.of(context).colorScheme.outlineVariant : TatoColors.primary,
                         ),
                       ),
                       child: Icon(
@@ -398,10 +418,10 @@ class _FilterChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? TatoColors.onSurface : TatoColors.surface,
+          color: selected ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(TatoSizes.radiusPill),
           border: Border.all(
-            color: selected ? TatoColors.onSurface : TatoColors.border,
+            color: selected ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.outlineVariant,
           ),
         ),
         child: Center(

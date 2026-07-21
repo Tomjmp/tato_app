@@ -8,6 +8,7 @@ import 'package:tato_app/features/insights/domain/entities/stock_insight.dart';
 import 'package:tato_app/features/movements/domain/entities/inventory_movement.dart';
 import 'package:tato_app/shared/widgets/empty_state.dart';
 import 'package:tato_app/shared/widgets/error_state.dart';
+import 'package:tato_app/shared/widgets/fade_in.dart';
 import 'package:tato_app/shared/widgets/movement_tile.dart';
 import 'package:tato_app/shared/widgets/product_avatar.dart';
 import 'package:tato_app/shared/widgets/stock_badge.dart';
@@ -75,10 +76,15 @@ class _HoyScreenState extends ConsumerState<HoyScreen> {
     final firstName = (user?.name ?? '').split(' ').first;
 
     return Scaffold(
-      backgroundColor: TatoColors.background,
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
+        child: RefreshIndicator(
+          onRefresh: () async {
+            setState(_loadData);
+            await _dataFuture;
+          },
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
             SliverPadding(
               padding: const EdgeInsets.symmetric(
                 horizontal: TatoSpacing.containerPadding,
@@ -105,20 +111,29 @@ class _HoyScreenState extends ConsumerState<HoyScreen> {
                     ),
                     IconButton(
                       icon: const Icon(Icons.notifications_outlined),
+                      tooltip: 'Ver alertas',
                       onPressed: () => context.go('/insights'),
                     ),
-                    GestureDetector(
-                      onTap: () => context.go('/profile'),
-                      child: CircleAvatar(
-                        radius: 19,
-                        backgroundColor: TatoColors.primaryContainer,
-                        child: Text(
-                          (user?.name?.isNotEmpty ?? false)
-                              ? user!.name![0].toUpperCase()
-                              : 'U',
-                          style: const TextStyle(
-                            color: TatoColors.onPrimaryContainer,
-                            fontWeight: FontWeight.bold,
+                    Semantics(
+                      button: true,
+                      label: 'Abrir perfil',
+                      child: InkWell(
+                        onTap: () => context.go('/profile'),
+                        customBorder: const CircleBorder(),
+                        child: Padding(
+                          padding: const EdgeInsets.all(5),
+                          child: CircleAvatar(
+                            radius: 19,
+                            backgroundColor: TatoColors.primaryContainer,
+                            child: Text(
+                              (user?.name?.isNotEmpty ?? false)
+                                  ? user!.name![0].toUpperCase()
+                                  : 'U',
+                              style: const TextStyle(
+                                color: TatoColors.onPrimaryContainer,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -160,9 +175,11 @@ class _HoyScreenState extends ConsumerState<HoyScreen> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _HeroCard(insight: insight),
+                        FadeIn(child: _HeroCard(insight: insight)),
                         const SizedBox(height: TatoSpacing.sm),
-                        Row(
+                        FadeIn(
+                          delay: const Duration(milliseconds: 90),
+                          child: Row(
                           children: [
                             Expanded(
                               child: _MiniStat(
@@ -191,6 +208,7 @@ class _HoyScreenState extends ConsumerState<HoyScreen> {
                               ),
                             ),
                           ],
+                          ),
                         ),
                         if (attention.isNotEmpty) ...[
                           const SizedBox(height: TatoSpacing.lg),
@@ -247,10 +265,10 @@ class _HoyScreenState extends ConsumerState<HoyScreen> {
                         else
                           Container(
                             decoration: BoxDecoration(
-                              color: TatoColors.surface,
+                              color: Theme.of(context).colorScheme.surface,
                               borderRadius:
                                   BorderRadius.circular(TatoSizes.radiusLg),
-                              border: Border.all(color: TatoColors.border),
+                              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                             ),
                             child: Column(
                               children: recentMovements
@@ -282,7 +300,8 @@ class _HoyScreenState extends ConsumerState<HoyScreen> {
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -439,12 +458,19 @@ class _MiniStat extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            value,
-            style: Theme.of(context)
-                .textTheme
-                .titleLarge
-                ?.copyWith(color: foreground),
+          // El número entra con crossfade cuando cambia tras un refresh.
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (child, anim) =>
+                FadeTransition(opacity: anim, child: child),
+            child: Text(
+              value,
+              key: ValueKey(value),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(color: foreground),
+            ),
           ),
           Text(
             label,
@@ -485,9 +511,9 @@ class _AttentionRow extends StatelessWidget {
           vertical: 10,
         ),
         decoration: BoxDecoration(
-          color: TatoColors.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(TatoSizes.radiusLg),
-          border: Border.all(color: TatoColors.border),
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         ),
         child: Row(
           children: [

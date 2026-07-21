@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
@@ -136,6 +137,7 @@ class _NewMovementScreenState extends ConsumerState<NewMovementScreen> {
 
     try {
       await ref.read(registerMovementUseCaseProvider)(movement);
+      HapticFeedback.mediumImpact();
       setState(() => _saving = false);
       if (mounted) context.pop();
     } on Failure catch (f) {
@@ -149,9 +151,7 @@ class _NewMovementScreenState extends ConsumerState<NewMovementScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TatoColors.background,
       appBar: AppBar(
-        backgroundColor: TatoColors.background,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
@@ -333,9 +333,9 @@ class _ProductResultTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(TatoSpacing.sm),
         decoration: BoxDecoration(
-          color: TatoColors.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(TatoSizes.radiusMd),
-          border: Border.all(color: TatoColors.border),
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         ),
         child: Row(
           children: [
@@ -374,7 +374,7 @@ class _SelectedProductCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(TatoSpacing.md),
       decoration: BoxDecoration(
-        color: TatoColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(TatoSizes.radiusMd),
         border: Border.all(color: TatoColors.primary.withOpacity(0.3)),
       ),
@@ -405,7 +405,7 @@ class _SelectedProductCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: TatoColors.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(100),
               ),
               child: Text('ID: ${product.sku}',
@@ -441,7 +441,7 @@ class _MiniToggle extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? color.withOpacity(0.12) : TatoColors.surfaceVariant,
+          color: selected ? color.withOpacity(0.12) : Theme.of(context).colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(TatoSizes.radiusMd),
           border: Border.all(color: selected ? color : Colors.transparent),
         ),
@@ -476,10 +476,10 @@ class _ReasonChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         margin: const EdgeInsets.only(bottom: TatoSpacing.xs),
         decoration: BoxDecoration(
-          color: selected ? TatoColors.onSurface : TatoColors.surface,
+          color: selected ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(TatoSizes.radiusPill),
           border: Border.all(
-            color: selected ? TatoColors.onSurface : TatoColors.border,
+            color: selected ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.outlineVariant,
             width: 1.5,
           ),
         ),

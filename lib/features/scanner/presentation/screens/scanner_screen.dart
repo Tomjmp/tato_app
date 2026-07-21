@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tato_app/core/constants/tato_constants.dart';
@@ -67,6 +68,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
   }
 
   void _confirm() {
+    HapticFeedback.mediumImpact();
     // Pushed as a picker (from the product form): hand the category back.
     // Opened as the standalone Scan tab: there's nothing to pop to, so
     // hand off to product creation instead.
@@ -197,8 +199,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
         return Container(
           padding: const EdgeInsets.fromLTRB(
               TatoSpacing.md, TatoSpacing.sm, TatoSpacing.md, TatoSpacing.md),
-          decoration: const BoxDecoration(
-            color: TatoColors.surface,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.vertical(
               top: Radius.circular(TatoSizes.radiusXl),
             ),
@@ -213,7 +215,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: TatoSpacing.sm),
                   decoration: BoxDecoration(
-                    color: TatoColors.border,
+                    color: Theme.of(context).colorScheme.outlineVariant,
                     borderRadius: BorderRadius.circular(100),
                   ),
                 ),
@@ -221,7 +223,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
               Container(
                 padding: const EdgeInsets.all(TatoSpacing.md),
                 decoration: BoxDecoration(
-                  color: TatoColors.surfaceVariant,
+                  color: Theme.of(context).colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(TatoSizes.radiusXl),
                   border: Border.all(color: color.withOpacity(0.3)),
                 ),
@@ -304,10 +306,10 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
                         decoration: BoxDecoration(
                           color: selected
                               ? chipColor.withOpacity(0.12)
-                              : TatoColors.surface,
+                              : Theme.of(context).colorScheme.surface,
                           borderRadius: BorderRadius.circular(TatoSizes.radiusMd),
                           border: Border.all(
-                            color: selected ? chipColor : TatoColors.border,
+                            color: selected ? chipColor : Theme.of(context).colorScheme.outlineVariant,
                           ),
                         ),
                         child: Text(

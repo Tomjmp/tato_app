@@ -60,6 +60,7 @@ dependencies:
 
   # On-Device AI Classification
   google_mlkit_image_labeling: ^0.12.0
+  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +75,7 @@ dev_dependencies:
   freezed: ^2.4.7
   json_serializable: ^6.7.1
   hive_generator: ^2.0.1
+  flutter_native_splash: ^2.4.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -85,6 +87,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/splash/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
