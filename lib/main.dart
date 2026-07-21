@@ -40,6 +40,8 @@ class TatoApp extends ConsumerWidget {
       title: 'TÁTO',
       debugShowCheckedModeBanner: false,
       theme: TatoTheme.lightTheme,
+      darkTheme: TatoTheme.darkTheme,
+      themeMode: ThemeMode.system,
       routerConfig: router,
     );
   }
