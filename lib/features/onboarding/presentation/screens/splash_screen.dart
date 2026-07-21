@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tato_app/core/constants/tato_constants.dart';
+import 'package:tato_app/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:tato_app/shared/widgets/tato_logo.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
+
+  /// Primera vez → onboarding; después va directo al login.
+  Future<void> _start(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    final seen = prefs.getBool(kOnboardingSeenKey) ?? false;
+    if (!context.mounted) return;
+    context.go(seen ? '/login' : '/onboarding');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +84,7 @@ class SplashScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 52,
                 child: FilledButton(
-                  onPressed: () => context.go('/login'),
+                  onPressed: () => _start(context),
                   style: FilledButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: TatoColors.primary,

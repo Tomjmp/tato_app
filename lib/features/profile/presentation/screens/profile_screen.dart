@@ -71,7 +71,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final notificationsEnabled = ref.watch(notificationsEnabledProvider);
 
     return Scaffold(
-      backgroundColor: TatoColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(TatoSpacing.containerPadding),
@@ -110,7 +109,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         decoration: BoxDecoration(
                           color: TatoColors.primary,
                           shape: BoxShape.circle,
-                          border: Border.all(color: TatoColors.background, width: 2),
+                          border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 2),
                         ),
                         child: const Icon(Icons.edit, color: Colors.white, size: 14),
                       ),
@@ -230,7 +229,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(TatoSpacing.md),
                   decoration: BoxDecoration(
-                    color: TatoColors.surface,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(TatoSizes.radiusXl),
                     border: Border.all(color: TatoColors.error.withOpacity(0.25)),
                   ),
@@ -287,9 +286,9 @@ class _StatTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: TatoSpacing.md),
       decoration: BoxDecoration(
-        color: TatoColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(TatoSizes.radiusXl),
-        border: Border.all(color: TatoColors.border),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Column(
         children: [
@@ -333,9 +332,9 @@ class _ListCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(TatoSpacing.md),
       decoration: BoxDecoration(
-        color: TatoColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(TatoSizes.radiusXl),
-        border: Border.all(color: TatoColors.border),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         boxShadow: TatoShadows.level1,
       ),
       child: Row(
@@ -344,7 +343,7 @@ class _ListCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: TatoColors.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(TatoSizes.radiusMd),
             ),
             child: Icon(icon, color: TatoColors.onSurfaceVariant),

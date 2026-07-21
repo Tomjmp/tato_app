@@ -10,16 +10,31 @@ class ProductAvatar extends StatelessWidget {
   final double size;
   final double radius;
 
+  /// Cuando se pasa, el avatar "vuela" entre la lista y el detalle (Hero).
+  final Object? heroTag;
+
   const ProductAvatar({
     super.key,
     this.imageUrl,
     this.categoryName,
     this.size = 48,
     this.radius = TatoSizes.radiusMd,
+    this.heroTag,
   });
 
   @override
   Widget build(BuildContext context) {
+    final avatar = _buildAvatar(context);
+    if (heroTag == null) return avatar;
+    return Hero(
+      tag: heroTag!,
+      flightShuttleBuilder: (_, __, ___, ____, toContext) =>
+          (toContext.widget as Hero).child,
+      child: avatar,
+    );
+  }
+
+  Widget _buildAvatar(BuildContext context) {
     final color = TatoCategories.colorFor(categoryName);
     return Container(
       width: size,

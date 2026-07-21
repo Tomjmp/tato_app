@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tato_app/features/onboarding/presentation/screens/splash_screen.dart';
+import 'package:tato_app/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:tato_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:tato_app/features/business/presentation/screens/setup_business_screen.dart';
 import 'package:tato_app/features/dashboard/presentation/screens/hoy_screen.dart';
@@ -33,8 +34,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       final hasBusiness = ref.read(currentBusinessProvider) != null;
       final path = state.matchedLocation;
 
-      // The splash screen controls its own timing/navigation.
-      if (path == '/splash') return null;
+      // Splash y onboarding controlan su propia navegación.
+      if (path == '/splash' || path == '/onboarding') return null;
 
       if (!isLoggedIn) {
         return path == '/login' ? null : '/login';
@@ -51,6 +52,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/splash',
         builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
       ),
       GoRoute(
         path: '/login',

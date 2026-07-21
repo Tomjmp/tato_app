@@ -25,7 +25,6 @@ class TatoAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: TatoColors.background,
       elevation: 0,
       centerTitle: false,
       leading: showBack

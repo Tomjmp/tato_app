@@ -25,11 +25,15 @@ class TatoLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      height: size,
-      child: CustomPaint(
-        painter: _TatoMarkPainter(color: color, dotColor: dotColor),
+    return Semantics(
+      label: 'Logo de TÁTO',
+      image: true,
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: CustomPaint(
+          painter: _TatoMarkPainter(color: color, dotColor: dotColor),
+        ),
       ),
     );
   }

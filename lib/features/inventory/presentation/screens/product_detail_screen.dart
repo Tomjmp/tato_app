@@ -59,7 +59,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TatoColors.background,
       body: FutureBuilder<Product?>(
         future: _productFuture,
         builder: (context, snapshot) {
@@ -68,14 +67,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           }
           if (snapshot.hasError) {
             return Scaffold(
-              appBar: AppBar(backgroundColor: TatoColors.background, elevation: 0),
+              appBar: AppBar(backgroundColor: Theme.of(context).scaffoldBackgroundColor, elevation: 0),
               body: const ErrorState(),
             );
           }
           final product = snapshot.data;
           if (product == null) {
             return Scaffold(
-              appBar: AppBar(backgroundColor: TatoColors.background, elevation: 0),
+              appBar: AppBar(backgroundColor: Theme.of(context).scaffoldBackgroundColor, elevation: 0),
               body: const Center(child: Text('Producto no encontrado.')),
             );
           }
@@ -91,7 +90,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               slivers: [
                 SliverAppBar(
                   pinned: true,
-                  backgroundColor: TatoColors.background,
                   leading: IconButton(
                     icon: const Icon(Icons.arrow_back_ios_new_rounded),
                     onPressed: () => context.pop(),
@@ -118,6 +116,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           categoryName: product.categoryName,
                           size: 80,
                           radius: TatoSizes.radiusXl,
+                          heroTag: 'product-avatar-${product.id}',
                         ),
                       ),
                       const SizedBox(height: TatoSpacing.sm),
@@ -249,11 +248,11 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               else
                                 Container(
                                   decoration: BoxDecoration(
-                                    color: TatoColors.surface,
+                                    color: Theme.of(context).colorScheme.surface,
                                     borderRadius: BorderRadius.circular(
                                         TatoSizes.radiusLg),
                                     border:
-                                        Border.all(color: TatoColors.border),
+                                        Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                                   ),
                                   child: Column(
                                     children: movements
@@ -316,8 +315,8 @@ class _MetricTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = background ?? TatoColors.surface;
-    final fg = foreground ?? TatoColors.onSurface;
+    final bg = background ?? Theme.of(context).colorScheme.surface;
+    final fg = foreground ?? Theme.of(context).colorScheme.onSurface;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: TatoSpacing.xs,
@@ -327,7 +326,7 @@ class _MetricTile extends StatelessWidget {
         color: bg,
         borderRadius: BorderRadius.circular(TatoSizes.radiusLg),
         border: background == null
-            ? Border.all(color: TatoColors.border)
+            ? Border.all(color: Theme.of(context).colorScheme.outlineVariant)
             : null,
       ),
       child: Column(
@@ -368,18 +367,18 @@ class _PriceCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: TatoSpacing.sm),
       decoration: BoxDecoration(
-        color: TatoColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(TatoSizes.radiusLg),
-        border: Border.all(color: TatoColors.border),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Row(
         children: [
           _priceColumn(context, 'Costo',
-              'RD\$${product.cost.toStringAsFixed(0)}', TatoColors.onSurface),
-          _separator(),
+              'RD\$${product.cost.toStringAsFixed(0)}', Theme.of(context).colorScheme.onSurface),
+          _separator(context),
           _priceColumn(context, 'Venta',
-              'RD\$${product.price.toStringAsFixed(0)}', TatoColors.onSurface),
-          _separator(),
+              'RD\$${product.price.toStringAsFixed(0)}', Theme.of(context).colorScheme.onSurface),
+          _separator(context),
           _priceColumn(
               context,
               'Margen',
@@ -390,8 +389,8 @@ class _PriceCard extends StatelessWidget {
     );
   }
 
-  Widget _separator() =>
-      Container(width: 1, height: 28, color: TatoColors.border);
+  Widget _separator(BuildContext context) =>
+      Container(width: 1, height: 28, color: Theme.of(context).colorScheme.outlineVariant);
 
   Widget _priceColumn(
       BuildContext context, String label, String value, Color color) {
@@ -438,9 +437,9 @@ class _DetailSection extends StatelessWidget {
         const SizedBox(height: TatoSpacing.sm),
         Container(
           decoration: BoxDecoration(
-            color: TatoColors.surface,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(TatoSizes.radiusLg),
-            border: Border.all(color: TatoColors.border),
+            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           ),
           child: Column(
             children: rows
@@ -470,7 +469,7 @@ class _DetailSection extends StatelessWidget {
                                   .textTheme
                                   .bodyMedium
                                   ?.copyWith(
-                                      color: TatoColors.onSurface,
+                                      color: Theme.of(context).colorScheme.onSurface,
                                       fontWeight: FontWeight.w600),
                             ),
                           ],
